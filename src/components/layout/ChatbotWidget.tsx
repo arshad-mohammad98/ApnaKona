@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, ChevronDown } from "lucide-react";
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   id: string;
@@ -17,38 +18,86 @@ const QUICK_REPLIES = [
   "Is ApnaKona free?",
 ];
 
-const BOT_ANSWERS: Record<string, string> = {
-  "How do I find a PG?": "Just go to the Search page, enter your city and filters, and browse listings! You can filter by budget, room type, gender preference and more. 🏠",
-  "What are your charges?": "ApnaKona is completely free for students! Property owners pay a small listing fee. No hidden charges. 🎉",
-  "How to contact an owner?": "Open any listing and click the 'Chat with Owner' button. You can directly message the owner from the listing detail page. 💬",
-  "Is ApnaKona free?": "Yes, 100% free for students! You can search, save, and connect with owners without any subscription. 🚀",
-};
-
 function now() {
   return new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
 }
 
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: "0", role: "bot", text: "Hi! I'm Kona 👋 Your ApnaKona assistant. How can I help you find your perfect room?", time: now() },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Load messages from localStorage on initial render
+    const saved = localStorage.getItem("kona_chat_history");
+    if (saved) {
+      try {
+        setMessages(JSON.parse(saved));
+      } catch (e) {
+        // Fallback to default
+        setMessages([{ id: "0", role: "bot", text: "Hi! I'm Kona 👋 Your ApnaKona assistant. How can I help you find your perfect room?", time: now() }]);
+      }
+    } else {
+      setMessages([{ id: "0", role: "bot", text: "Hi! I'm Kona 👋 Your ApnaKona assistant. How can I help you find your perfect room?", time: now() }]);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save to localStorage whenever messages change
+    if (messages.length > 0) {
+      localStorage.setItem("kona_chat_history", JSON.stringify(messages));
+    }
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, open]);
 
-  const sendMessage = (text: string) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim()) return;
     const userMsg: Message = { id: Date.now().toString(), role: "user", text, time: now() };
-    setMessages((prev) => [...prev, userMsg]);
+    const newMessages = [...messages, userMsg];
+    setMessages(newMessages);
     setInput("");
-    setTimeout(() => {
-      const reply = BOT_ANSWERS[text] || "Thanks for your message! Our team will get back to you shortly. You can also explore our Search and Explore pages to find what you need. 😊";
-      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: "bot", text: reply, time: now() }]);
-    }, 700);
+    setLoading(true);
+
+    try {
+      // Gemini requires the history to start with a 'user' message
+      // We'll slice off the initial bot greeting
+      let filteredMessages = newMessages;
+      if (filteredMessages.length > 0 && filteredMessages[0].role === "bot") {
+        filteredMessages = filteredMessages.slice(1);
+      }
+
+      const apiMessages = filteredMessages.map(m => ({
+        role: m.role,
+        content: m.text
+      }));
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages: apiMessages }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch response");
+      }
+
+      const data = await response.json();
+      
+      if (data.error) {
+         setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: "bot", text: "Oops, I'm having trouble connecting right now. Make sure the API key is configured! 🛠️", time: now() }]);
+      } else {
+         setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: "bot", text: data.reply, time: now() }]);
+      }
+    } catch (error) {
+      console.error(error);
+      setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: "bot", text: "Sorry, I couldn't process that. Please try again later.", time: now() }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,10 +118,10 @@ export default function ChatbotWidget() {
 
       {/* Chat Panel */}
       <div
-        className={`fixed bottom-24 right-6 z-50 w-80 bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 transition-all duration-300 ${
+        className={`fixed bottom-24 right-6 z-50 w-[350px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-gray-100 transition-all duration-300 ${
           open ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-4 pointer-events-none"
         }`}
-        style={{ height: 460 }}
+        style={{ height: 500 }}
       >
         {/* Header */}
         <div className="bg-gradient-to-r from-[#0F4C81] to-[#1a6db5] px-4 py-4 flex items-center justify-between">
@@ -101,14 +150,29 @@ export default function ChatbotWidget() {
                 className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                   msg.role === "user"
                     ? "bg-[#0F4C81] text-white rounded-br-sm"
-                    : "bg-white text-gray-700 shadow-sm border border-gray-100 rounded-bl-sm"
+                    : "bg-white text-gray-700 shadow-sm border border-gray-100 rounded-bl-sm prose prose-sm max-w-none"
                 }`}
               >
-                {msg.text}
-                <p className={`text-xs mt-1 ${msg.role === "user" ? "text-white/60" : "text-gray-400"}`}>{msg.time}</p>
+                {msg.role === "bot" ? (
+                   <ReactMarkdown>{msg.text}</ReactMarkdown>
+                ) : (
+                   msg.text
+                )}
+                <p className={`text-xs mt-1 text-right ${msg.role === "user" ? "text-white/60" : "text-gray-400"}`}>{msg.time}</p>
               </div>
             </div>
           ))}
+          
+          {loading && (
+             <div className="flex justify-start">
+              <div className="bg-white text-gray-700 shadow-sm border border-gray-100 rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-1">
+                 <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                 <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                 <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+             </div>
+          )}
+
           <div ref={bottomRef} />
         </div>
 
@@ -118,7 +182,8 @@ export default function ChatbotWidget() {
             <button
               key={q}
               onClick={() => sendMessage(q)}
-              className="shrink-0 px-3 py-1.5 bg-[#0F4C81]/8 text-[#0F4C81] text-xs rounded-full hover:bg-[#0F4C81] hover:text-white transition-colors border border-[#0F4C81]/20"
+              disabled={loading}
+              className="shrink-0 px-3 py-1.5 bg-[#0F4C81]/8 text-[#0F4C81] text-xs rounded-full hover:bg-[#0F4C81] hover:text-white transition-colors border border-[#0F4C81]/20 disabled:opacity-50"
             >
               {q}
             </button>
@@ -131,13 +196,15 @@ export default function ChatbotWidget() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && sendMessage(input)}
+            onKeyDown={(e) => e.key === "Enter" && !loading && sendMessage(input)}
             placeholder="Type a message..."
-            className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none focus:bg-gray-200 transition-colors"
+            disabled={loading}
+            className="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm outline-none focus:bg-gray-200 transition-colors disabled:opacity-50"
           />
           <button
             onClick={() => sendMessage(input)}
-            className="w-9 h-9 bg-[#FF6B35] rounded-full flex items-center justify-center hover:bg-[#e85a22] transition-colors"
+            disabled={loading}
+            className="w-9 h-9 bg-[#FF6B35] rounded-full flex items-center justify-center hover:bg-[#e85a22] transition-colors disabled:opacity-50"
           >
             <Send className="w-4 h-4 text-white" />
           </button>
