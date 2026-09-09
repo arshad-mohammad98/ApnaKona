@@ -86,8 +86,8 @@ const FALLBACK_KNOWLEDGE: Record<string, string> = {
 };
 
 const DEFAULT_GREETING =
-  "Hi! I'm **Kona** 👋 Your personal ApnaKona housing assistant.\n\n" +
-  "I can help you discover verified PGs near your college, compare rents, understand safety features, or guide you through listing your property. How can I help you today?";
+  "Hi! I'm **Roomie** 👋 Your personal ApnaKona housing guide.\n\n" +
+  "I can help you discover verified PGs near your campus, break down realistic rents, check safety features, or guide you through listing a property. What are you looking for?";
 
 function now() {
   return new Date().toLocaleTimeString("en-IN", {
@@ -116,7 +116,9 @@ export default function ChatbotWidget() {
       setIsDark(true);
     }
 
-    const saved = localStorage.getItem("kona_chat_history");
+    const saved =
+      localStorage.getItem("roomie_chat_history") ||
+      localStorage.getItem("kona_chat_history");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -143,7 +145,7 @@ export default function ChatbotWidget() {
   // Save messages to localStorage
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem("kona_chat_history", JSON.stringify(messages));
+      localStorage.setItem("roomie_chat_history", JSON.stringify(messages));
     }
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading, open]);
@@ -171,7 +173,7 @@ export default function ChatbotWidget() {
       time: now(),
     };
     setMessages([freshGreeting]);
-    localStorage.setItem("kona_chat_history", JSON.stringify([freshGreeting]));
+    localStorage.setItem("roomie_chat_history", JSON.stringify([freshGreeting]));
   };
 
   const sendMessage = async (textToSend: string) => {
@@ -272,7 +274,7 @@ export default function ChatbotWidget() {
             <button
               id="chatbot-launcher"
               onClick={() => setOpen(true)}
-              aria-label="Chat with Kona AI"
+              aria-label="Chat with Roomie AI"
               className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#0F4C81] via-[#155a96] to-[#FF6B35] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#0F4C81]/30"
             >
               {/* Bot Avatar Icon */}
@@ -290,7 +292,7 @@ export default function ChatbotWidget() {
 
             {/* Hover Tooltip Badge */}
             <div className="hidden sm:block absolute right-full mr-3 top-1/2 -translate-y-1/2 px-3.5 py-1.5 bg-[#1A1A2E] text-white text-xs font-medium rounded-xl whitespace-nowrap shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200">
-              Need help? Ask Kona 👋
+              Need help? Ask Roomie 👋
               <div className="absolute top-1/2 -right-1 -translate-y-1/2 border-solid border-l-[#1A1A2E] border-l-4 border-y-transparent border-y-4 border-r-0" />
             </div>
           </div>
@@ -301,7 +303,7 @@ export default function ChatbotWidget() {
       <div
         id="chatbot-window"
         role="dialog"
-        aria-label="Kona AI Housing Assistant"
+        aria-label="Roomie AI Housing Assistant"
         className={`fixed z-50 transition-all duration-300 ease-out origin-bottom-right ${
           open
             ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
@@ -333,7 +335,7 @@ export default function ChatbotWidget() {
             <div className="leading-tight">
               <div className="flex items-center gap-1.5">
                 <h3 className="font-semibold text-base tracking-tight text-white">
-                  Kona
+                  Roomie
                 </h3>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-white/20 text-white/90">
                   AI Guide
@@ -432,7 +434,7 @@ export default function ChatbotWidget() {
               </div>
               <div className="bg-white dark:bg-[#1E2238] border border-gray-200/70 dark:border-gray-700/60 rounded-2xl rounded-bl-xs px-4 py-3 shadow-sm flex items-center gap-1.5">
                 <span className="text-xs text-gray-500 dark:text-gray-400 mr-1 font-medium">
-                  Kona is thinking
+                  Roomie is thinking
                 </span>
                 <span
                   className="w-1.5 h-1.5 rounded-full bg-[#0F4C81] dark:bg-sky-400 animate-bounce"
@@ -508,7 +510,7 @@ export default function ChatbotWidget() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={loading ? "Waiting for Kona..." : "Ask Kona anything about PGs, rent..."}
+              placeholder={loading ? "Waiting for Roomie..." : "Ask Roomie anything about PGs, rent..."}
               disabled={loading}
               className="flex-1 bg-transparent text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none py-1.5 disabled:opacity-50"
             />
