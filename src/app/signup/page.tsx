@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, GraduationCap, Building2, Mail, Lock, Phone, User, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/context/AuthContext";
+import Logo from "@/components/ui/Logo";
 
 function SignupContent() {
   const searchParams = useSearchParams();
@@ -48,13 +49,8 @@ function SignupContent() {
     <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] to-blue-50/40 flex items-center justify-center py-12 px-4 sm:px-6">
       <div className="w-full max-w-md mx-auto">
         <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6 sm:p-8">
-          <Link href="/" className="flex items-center gap-2 mb-6 sm:mb-8">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F4C81] to-[#1a6db5] flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-sm">A</span>
-            </div>
-            <span className="font-display font-bold text-xl text-[#1A1A2E]">
-              Apna<span className="text-[#FF6B35]">Kona</span>
-            </span>
+          <Link href="/" className="inline-block mb-6 sm:mb-8" aria-label="ApnaKona Home">
+            <Logo variant="full" size="md" />
           </Link>
 
           <h1 className="font-display text-2xl font-bold text-[#1A1A2E] mb-1">Create an account</h1>

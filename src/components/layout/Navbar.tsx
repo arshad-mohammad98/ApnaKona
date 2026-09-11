@@ -17,6 +17,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "@/lib/context/AuthContext";
+import Logo from "@/components/ui/Logo";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -65,13 +66,8 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0F4C81] to-[#1a6db5] flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-              <span className="text-white font-bold text-base">A</span>
-            </div>
-            <span className="font-display font-bold text-xl text-[#1A1A2E] tracking-tight">
-              Apna<span className="text-[#FF6B35]">Kona</span>
-            </span>
+          <Link href="/" className="flex items-center group shrink-0" aria-label="ApnaKona Home">
+            <Logo variant="full" size="md" />
           </Link>
 
           {/* Desktop Navigation Links */}

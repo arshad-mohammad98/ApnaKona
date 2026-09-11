@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Home, Search, Map, Users, MessageSquare, Mail, Phone, Globe, Share2, Briefcase } from "lucide-react";
+import Logo from "@/components/ui/Logo";
 
 export default function Footer() {
   return (
@@ -10,13 +11,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-white/10">
           {/* Brand */}
           <div className="space-y-4">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F4C81] to-[#1a6db5] flex items-center justify-center shadow-md">
-                <span className="text-white font-bold text-sm">A</span>
-              </div>
-              <span className="font-display font-bold text-xl">
-                Apna<span className="text-[#FF6B35]">Kona</span>
-              </span>
+            <Link href="/" className="inline-block group" aria-label="ApnaKona Home">
+              <Logo variant="full" size="md" theme="dark" />
             </Link>
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm">
               India&apos;s most trusted platform for students to find safe, affordable, and verified accommodation near top colleges.

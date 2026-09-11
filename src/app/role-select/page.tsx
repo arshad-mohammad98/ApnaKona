@@ -4,6 +4,7 @@ import Link from "next/link";
 import { GraduationCap, Building2, ArrowRight, CheckCircle } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Logo from "@/components/ui/Logo";
 
 export default function RoleSelectPage() {
   const [hovered, setHovered] = useState<"student" | "owner" | null>(null);
@@ -14,13 +15,8 @@ export default function RoleSelectPage() {
       <div className="max-w-4xl w-full mx-auto">
         {/* Header */}
         <div className="text-center mb-10 sm:mb-12">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0F4C81] to-[#1a6db5] flex items-center justify-center shadow-md">
-              <span className="text-white font-bold text-base">A</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-[#1A1A2E]">
-              Apna<span className="text-[#FF6B35]">Kona</span>
-            </span>
+          <Link href="/" className="inline-block mb-6" aria-label="ApnaKona Home">
+            <Logo variant="full" size="lg" />
           </Link>
           <h1 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold text-[#1A1A2E] mb-2">
             Who are you joining as?
