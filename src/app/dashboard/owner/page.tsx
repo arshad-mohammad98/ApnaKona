@@ -218,7 +218,7 @@ export default function OwnerDashboard() {
                   </p>
                   <div className="flex items-center gap-2">
                     <Link
-                      href={`/listing/${l.id}`}
+                      href={`/hostels/${l.id}`}
                       className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-semibold transition-colors min-h-[36px] flex items-center"
                     >
                       View Live

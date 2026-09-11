@@ -52,7 +52,7 @@ export default function Footer() {
             <ul className="space-y-2.5">
               {[
                 { href: "/", label: "Home", icon: Home },
-                { href: "/search", label: "Find Accommodation", icon: Search },
+                { href: "/hostels", label: "Hostel/PG", icon: Search },
                 { href: "/explore", label: "Explore City", icon: Map },
                 { href: "/connect", label: "Find Roommates", icon: Users },
                 { href: "/grievance", label: "Raise Grievance", icon: MessageSquare },

@@ -181,7 +181,7 @@ export default function ExplorePage() {
                   {cityListings.map((l) => (
                     <Link
                       key={l.id}
-                      href={`/listing/${l.id}`}
+                      href={`/hostels/${l.id}`}
                       className="flex items-center gap-3 p-2.5 bg-gray-50 hover:bg-gray-100 rounded-2xl transition-colors cursor-pointer"
                     >
                       <img

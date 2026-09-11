@@ -179,7 +179,7 @@ export default function StudentDashboard() {
                         ₹{l.price.toLocaleString("en-IN")}/mo
                       </span>
                       <Link
-                        href={`/listing/${l.id}`}
+                        href={`/hostels/${l.id}`}
                         className="px-3.5 py-1.5 bg-[#0F4C81]/10 text-[#0F4C81] hover:bg-[#0F4C81] hover:text-white rounded-xl text-xs font-semibold transition-colors min-h-[36px] flex items-center"
                       >
                         View Details

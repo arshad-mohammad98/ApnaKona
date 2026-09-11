@@ -13,7 +13,7 @@ export default function Hero() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    router.push(`/search?city=${encodeURIComponent(city)}`);
+    router.push(`/hostels?city=${encodeURIComponent(city)}`);
   };
 
   return (
@@ -101,7 +101,7 @@ export default function Hero() {
               {CITIES.slice(0, 5).map((c) => (
                 <button
                   key={c}
-                  onClick={() => { setCity(c); router.push(`/search?city=${c}`); }}
+                  onClick={() => { setCity(c); router.push(`/hostels?city=${c}`); }}
                   className="text-xs px-2.5 py-1.5 min-h-[32px] bg-[#0F4C81]/8 text-[#0F4C81] rounded-full hover:bg-[#0F4C81] hover:text-white transition-colors cursor-pointer"
                 >
                   {c}

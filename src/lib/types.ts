@@ -61,6 +61,8 @@ export interface Listing {
   tags: string[];
   available: boolean;
   postedAt: string;
+  verified?: boolean;
+  featured?: boolean;
 }
 
 export interface Review {
@@ -69,6 +71,7 @@ export interface Review {
   userId: string;
   userName: string;
   userAvatar?: string;
+  userCollege?: string;
   rating: number;
   comment: string;
   date: string;
