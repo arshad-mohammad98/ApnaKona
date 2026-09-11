@@ -1,24 +1,30 @@
 import type { Metadata } from "next";
 import Hero from "@/components/landing/Hero";
+import PortalSearch from "@/components/landing/PortalSearch";
+import PortalExplore from "@/components/landing/PortalExplore";
+import PortalConnect from "@/components/landing/PortalConnect";
 import HowItWorks from "@/components/landing/HowItWorks";
-import FeaturedListings from "@/components/landing/FeaturedListings";
+import PortalGrievance from "@/components/landing/PortalGrievance";
 import Testimonials from "@/components/landing/Testimonials";
 import OwnerCTA from "@/components/landing/OwnerCTA";
 
 export const metadata: Metadata = {
-  title: "ApnaKona — Find PG, Hostel & Flats Near Your College",
+  title: "ApnaKona — All-in-One Student Housing Portal",
   description:
-    "India's most trusted platform for students to find safe, affordable PGs, hostels, and flats. No broker fees. Verified listings across 200+ cities.",
+    "India's all-in-one student housing platform: search verified PGs, explore transit maps, connect with college roommates, and resolve grievances with zero broker fees.",
 };
 
 export default function HomePage() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Hero />
+      <PortalSearch />
+      <PortalExplore />
+      <PortalConnect />
       <HowItWorks />
-      <FeaturedListings />
+      <PortalGrievance />
       <Testimonials />
       <OwnerCTA />
-    </>
+    </div>
   );
 }

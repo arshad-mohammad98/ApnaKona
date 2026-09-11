@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  MessageCircle,
   X,
   Send,
   Bot,
@@ -48,27 +47,26 @@ const QUICK_REPLIES = [
   },
 ];
 
-// High quality fallback answers for offline/API issues
 const FALLBACK_KNOWLEDGE: Record<string, string> = {
   "How can I find a PG near my college?":
     "Here is how to quickly find a PG near your campus:\n\n" +
     "1. Go to the **[Find PG / Hostel](/search)** tab in the top navigation.\n" +
-    "2. Enter your **college or university name** in the search bar.\n" +
-    "3. Set your preferred distance filter (e.g. within 1–3 km) and room sharing (Single, Double, or Triple).\n" +
-    "4. Look for listings with the **Verified** badge 🛡️ for guaranteed zero-brokerage and inspected amenities.\n\n" +
-    "Would you like me to recommend budget ranges or localities for a specific city?",
+    "2. Enter your **college or locality name** in the search bar.\n" +
+    "3. Set your preferred distance filter and room sharing (Single, Double, or Triple).\n" +
+    "4. Look for listings with the **Verified** badge 🛡️ for zero-brokerage and inspected amenities.\n\n" +
+    "Would you like me to recommend budget ranges for a specific city?",
 
   "How does property and owner verification work on ApnaKona?":
     "Student safety is our top priority! Here is our 3-step verification system:\n\n" +
-    "- 🛡️ **Physical Inspection**: Our field team verifies premises for CCTV, security, fire safety, and hygiene.\n" +
-    "- 📄 **Owner KYC**: We verify government ID and ownership records before awarding the verified badge.\n" +
-    "- ⚡ **Amenity Testing**: High-speed Wi-Fi, RO drinking water, and backup power are validated on-site.\n\n" +
-    "Verified rooms carry the green shield icon on their listing card so you can book with 100% confidence.",
+    "- 🛡️ **Physical Inspection**: Our field team verifies premises for CCTV, safety, fire exits, and cleanliness.\n" +
+    "- 📄 **Owner KYC**: We verify government ID and property ownership records before awarding the badge.\n" +
+    "- ⚡ **Amenity Testing**: High-speed Wi-Fi, drinking water, and power backup are validated on-site.\n\n" +
+    "Verified rooms carry the green shield icon so you can book with confidence.",
 
   "What is a realistic budget range for student PGs and hostels?":
     "Here is a typical student budget guide across Indian cities:\n\n" +
     "- **Metro Cities (Bengaluru, Delhi NCR, Mumbai, Pune)**:\n" +
-    "  - *Triple/Quad Sharing*: ₹6,500 – ₹9,500/mo (usually includes meals + Wi-Fi)\n" +
+    "  - *Triple/Quad Sharing*: ₹6,500 – ₹9,500/mo (with meals + Wi-Fi)\n" +
     "  - *Double Sharing*: ₹9,500 – ₹15,000/mo\n" +
     "  - *Private Single Room*: ₹15,000 – ₹24,000/mo\n" +
     "- **Tier 2 Cities (Jaipur, Indore, Lucknow, Chandigarh)**:\n" +
@@ -78,9 +76,9 @@ const FALLBACK_KNOWLEDGE: Record<string, string> = {
 
   "How do I list my property on ApnaKona as an owner?":
     "Listing your PG, hostel, or flat on ApnaKona is 100% free with zero commission:\n\n" +
-    "1. Click **Sign Up** and choose the **Owner** role.\n" +
+    "1. Click **Sign Up** and select the **Owner** role.\n" +
     "2. Open your Owner Dashboard and click **+ Add Listing**.\n" +
-    "3. Add clear photos, room sharing types, rules (curfew, food policy), and monthly rent.\n" +
+    "3. Add clear photos, room types, house rules, and monthly rent.\n" +
     "4. Request an inspection visit to earn the **Verified Partner** badge and get up to 3x more student leads!\n\n" +
     "Need help getting started? Visit our [Property Listing Guide](/role-select).",
 };
@@ -89,91 +87,112 @@ const DEFAULT_GREETING =
   "Hi! I'm **Roomie** 👋 Your personal ApnaKona housing guide.\n\n" +
   "I can help you discover verified PGs near your campus, break down realistic rents, check safety features, or guide you through listing a property. What are you looking for?";
 
-function now() {
+function getFormattedTime() {
   return new Date().toLocaleTimeString("en-IN", {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
+function generateMsgId() {
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
 export default function ChatbotWidget() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "initial-greeting",
+      role: "bot",
+      text: DEFAULT_GREETING,
+      time: "Just now",
+    },
+  ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize theme and messages from localStorage
+  // Initialize saved theme and messages safely after mount
   useEffect(() => {
-    // Check system preference or existing theme
-    const prefersDark =
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const savedTheme = localStorage.getItem("apnakona_chatbot_theme");
-    if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-      setIsDark(true);
-    }
+    try {
+      const savedTheme = localStorage.getItem("apnakona_chatbot_theme");
+      const prefersDark =
+        window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        setTimeout(() => setIsDark(true), 0);
+      }
 
-    const saved =
-      localStorage.getItem("roomie_chat_history") ||
-      localStorage.getItem("kona_chat_history");
-    if (saved) {
-      try {
+      const saved =
+        localStorage.getItem("roomie_chat_history") ||
+        localStorage.getItem("kona_chat_history");
+      if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setMessages(parsed);
-          return;
+          setTimeout(() => setMessages(parsed), 0);
         }
-      } catch (e) {
-        // Fallback to initial greeting
       }
+    } catch {
+      // Fallback gracefully
     }
-
-    // Default first greeting
-    setMessages([
-      {
-        id: "initial-greeting",
-        role: "bot",
-        text: DEFAULT_GREETING,
-        time: now(),
-      },
-    ]);
   }, []);
 
-  // Save messages to localStorage
+  // Save history whenever messages change
   useEffect(() => {
     if (messages.length > 0) {
-      localStorage.setItem("roomie_chat_history", JSON.stringify(messages));
+      try {
+        localStorage.setItem("roomie_chat_history", JSON.stringify(messages));
+      } catch {
+        // Silently catch quota exceptions
+      }
     }
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading, open]);
+  }, [messages]);
 
   // Focus input when opened
   useEffect(() => {
     if (open) {
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 150);
+      setTimeout(() => inputRef.current?.focus(), 150);
     }
+  }, [open]);
+
+  // Prevent background scrolling on mobile when open
+  useEffect(() => {
+    if (open && typeof window !== "undefined" && window.innerWidth < 768) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
   }, [open]);
 
   const toggleTheme = () => {
     const nextTheme = !isDark;
     setIsDark(nextTheme);
-    localStorage.setItem("apnakona_chatbot_theme", nextTheme ? "dark" : "light");
+    try {
+      localStorage.setItem("apnakona_chatbot_theme", nextTheme ? "dark" : "light");
+    } catch {
+      // Storage unavailable
+    }
   };
 
   const clearChat = () => {
     const freshGreeting: Message = {
-      id: Date.now().toString(),
+      id: generateMsgId(),
       role: "bot",
       text: DEFAULT_GREETING,
-      time: now(),
+      time: getFormattedTime(),
     };
     setMessages([freshGreeting]);
-    localStorage.setItem("roomie_chat_history", JSON.stringify([freshGreeting]));
+    try {
+      localStorage.setItem("roomie_chat_history", JSON.stringify([freshGreeting]));
+    } catch {
+      // ignore
+    }
   };
 
   const sendMessage = async (textToSend: string) => {
@@ -181,10 +200,10 @@ export default function ChatbotWidget() {
     if (!cleanText || loading) return;
 
     const userMsg: Message = {
-      id: Date.now().toString(),
+      id: generateMsgId(),
       role: "user",
       text: cleanText,
-      time: now(),
+      time: getFormattedTime(),
     };
 
     const newMessages = [...messages, userMsg];
@@ -193,7 +212,6 @@ export default function ChatbotWidget() {
     setLoading(true);
 
     try {
-      // Prepare history for API (filter out first bot greeting if needed)
       let filteredMessages = newMessages;
       if (filteredMessages.length > 0 && filteredMessages[0].role === "bot") {
         filteredMessages = filteredMessages.slice(1);
@@ -211,48 +229,46 @@ export default function ChatbotWidget() {
       });
 
       if (!response.ok) {
-        throw new Error("Chat service responded with an error");
+        throw new Error("Chat service returned an error");
       }
 
       const data = await response.json();
 
       if (data.error || !data.reply) {
-        // Fallback to local knowledge base
         const fallback =
           FALLBACK_KNOWLEDGE[cleanText] ||
           "I'm here to help with all ApnaKona questions! You can search verified student PGs and hostels directly on our [Search Page](/search), check safe local neighborhoods on our [Explore Map](/explore), or post room requirements on [Connect](/connect).";
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: generateMsgId(),
             role: "bot",
             text: fallback,
-            time: now(),
+            time: getFormattedTime(),
           },
         ]);
       } else {
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: generateMsgId(),
             role: "bot",
             text: data.reply,
-            time: now(),
+            time: getFormattedTime(),
           },
         ]);
       }
-    } catch (err) {
-      // Graceful offline / fallback handling
+    } catch {
       const fallback =
         FALLBACK_KNOWLEDGE[cleanText] ||
         "I'm currently assisting in offline mode! You can browse 100% verified student accommodations on our [Search](/search) page, or check student safety guidelines in our [Grievance & Support](/grievance) center. Feel free to ask another question!";
       setMessages((prev) => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: generateMsgId(),
           role: "bot",
           text: fallback,
-          time: now(),
+          time: getFormattedTime(),
         },
       ]);
     } finally {
@@ -265,22 +281,23 @@ export default function ChatbotWidget() {
   return (
     <div className={isDark ? "dark" : ""}>
       {/* Floating Circular Launcher Button */}
-      <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-50">
+      <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40">
         {!open && (
           <div className="relative group">
-            {/* Ambient Pulse Glow */}
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#0F4C81] via-[#1a6db5] to-[#FF6B35] opacity-70 blur-sm animate-pulse-glow" />
 
             <button
               id="chatbot-launcher"
               onClick={() => setOpen(true)}
               aria-label="Chat with Roomie AI"
-              className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#0F4C81] via-[#155a96] to-[#FF6B35] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-[#0F4C81]/30"
+              className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#0F4C81] via-[#155a96] to-[#FF6B35] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#0F4C81]/30"
             >
-              {/* Bot Avatar Icon */}
               <div className="relative flex items-center justify-center">
                 <Bot className="w-7 h-7 sm:w-8 sm:h-8 transition-transform group-hover:scale-110" />
-                <Sparkles className="w-3.5 h-3.5 text-yellow-300 absolute -top-1 -right-1 animate-spin" style={{ animationDuration: "6s" }} />
+                <Sparkles
+                  className="w-3.5 h-3.5 text-yellow-300 absolute -top-1 -right-1 animate-spin"
+                  style={{ animationDuration: "6s" }}
+                />
               </div>
 
               {/* Online Green Pulsing Indicator */}
@@ -299,21 +316,21 @@ export default function ChatbotWidget() {
         )}
       </div>
 
-      {/* Chat Window */}
+      {/* Chat Window: Full-screen on Mobile (<768px), Wide Panel on Desktop/Tablet (>=768px) */}
       <div
         id="chatbot-window"
         role="dialog"
         aria-label="Roomie AI Housing Assistant"
-        className={`fixed z-50 transition-all duration-300 ease-out origin-bottom-right ${
+        className={`fixed z-50 transition-all duration-300 ease-out ${
           open
-            ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
-            : "opacity-0 translate-y-6 scale-95 pointer-events-none"
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-6 pointer-events-none"
         }
-        /* Mobile: responsive bottom sheet / near full screen */
-        bottom-4 right-3 left-3 h-[calc(100dvh-5rem)] max-h-[640px]
-        /* Desktop: fixed compact window */
-        sm:left-auto sm:right-6 sm:bottom-6 sm:w-[380px] sm:h-[550px] sm:max-h-[85vh]
-        flex flex-col rounded-3xl overflow-hidden shadow-2xl
+        /* Mobile: Full-screen display */
+        inset-0 w-full h-[100dvh] rounded-none
+        /* Tablet & Desktop: Wide panel */
+        md:inset-auto md:bottom-6 md:right-6 md:w-[460px] md:h-[640px] md:max-h-[88vh] md:rounded-3xl
+        flex flex-col overflow-hidden shadow-2xl
         border border-gray-200/80 dark:border-gray-800/80
         bg-white dark:bg-[#151726] text-gray-900 dark:text-gray-100
         backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10
@@ -321,7 +338,6 @@ export default function ChatbotWidget() {
       >
         {/* Header */}
         <div className="relative px-4 py-3.5 bg-gradient-to-r from-[#0F4C81] via-[#165a9a] to-[#0F4C81] text-white flex items-center justify-between shadow-sm shrink-0">
-          {/* Header Left: Avatar + Title */}
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-inner">
@@ -334,145 +350,112 @@ export default function ChatbotWidget() {
 
             <div className="leading-tight">
               <div className="flex items-center gap-1.5">
-                <h3 className="font-semibold text-base tracking-tight text-white">
-                  Roomie
-                </h3>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-white/20 text-white/90">
+                <h3 className="font-semibold text-base tracking-tight text-white">Roomie</h3>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/20 text-white">
                   AI Guide
                 </span>
               </div>
-              <p className="text-xs text-white/80 flex items-center gap-1">
-                ApnaKona Housing Assistant
-              </p>
+              <p className="text-xs text-white/80">ApnaKona Housing Assistant</p>
             </div>
           </div>
 
-          {/* Header Right: Controls */}
-          <div className="flex items-center gap-1">
-            {/* Theme Toggle */}
+          {/* Header Controls */}
+          <div className="flex items-center gap-1.5">
             <button
               onClick={toggleTheme}
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               aria-label="Toggle chatbot theme"
-              className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors"
+              className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
             >
               {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </button>
-
-            {/* Clear Chat */}
             <button
               onClick={clearChat}
               title="Reset conversation"
-              aria-label="Reset chat history"
-              className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors"
+              aria-label="Reset conversation"
+              className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
             >
               <RotateCcw className="w-4 h-4" />
             </button>
-
-            {/* Close Button */}
             <button
-              id="chatbot-close-button"
               onClick={() => setOpen(false)}
-              aria-label="Close chat window"
-              className="p-1.5 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors ml-0.5"
+              aria-label="Close chatbot window"
+              className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Messages Scroll Area */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-gray-50/70 dark:bg-[#121422] transition-colors">
-          {messages.map((msg) => {
-            const isBot = msg.role === "bot";
+        {/* Message Stream */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 dark:bg-[#10121f]/50">
+          {messages.map((m) => {
+            const isUser = m.role === "user";
             return (
               <div
-                key={msg.id}
-                className={`flex gap-2.5 items-end animate-message-in ${
-                  isBot ? "justify-start" : "justify-end"
+                key={m.id}
+                className={`flex gap-2.5 max-w-[88%] animate-message-in ${
+                  isUser ? "ml-auto flex-row-reverse" : "mr-auto"
                 }`}
               >
-                {/* Bot Avatar beside bot bubbles */}
-                {isBot && (
-                  <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#0F4C81] to-[#FF6B35] flex items-center justify-center shrink-0 shadow-sm mb-1 text-white">
+                {!isUser && (
+                  <div className="w-8 h-8 rounded-xl bg-[#0F4C81]/10 dark:bg-[#0F4C81]/30 border border-[#0F4C81]/20 flex items-center justify-center text-[#0F4C81] dark:text-[#5c93e2] shrink-0 mt-0.5">
                     <Bot className="w-4 h-4" />
                   </div>
                 )}
-
-                <div
-                  className={`relative max-w-[85%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed transition-all shadow-sm ${
-                    isBot
-                      ? "bg-white dark:bg-[#1E2238] text-gray-800 dark:text-gray-100 border border-gray-200/70 dark:border-gray-700/60 rounded-bl-xs"
-                      : "bg-gradient-to-r from-[#0F4C81] to-[#1c6bb3] text-white rounded-br-xs"
-                  }`}
-                >
-                  {isBot ? (
-                    <div className="prose prose-sm dark:prose-invert max-w-none text-gray-800 dark:text-gray-100 text-sm [&>p]:mb-2 [&>p:last-child]:mb-0 [&>ul]:my-1.5 [&>ul]:pl-4 [&>ol]:my-1.5 [&>ol]:pl-4 [&>ul>li]:list-disc [&>ol>li]:list-decimal [&>ul>li]:my-0.5 [&>ol>li]:my-0.5 [&_strong]:font-semibold [&_a]:text-[#0F4C81] dark:[&_a]:text-sky-400 [&_a]:underline font-normal">
-                      <ReactMarkdown>{msg.text}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    <p className="whitespace-pre-wrap">{msg.text}</p>
-                  )}
-
+                <div className="space-y-1">
                   <div
-                    className={`text-[10px] mt-1 text-right select-none ${
-                      isBot ? "text-gray-400 dark:text-gray-500" : "text-white/70"
+                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                      isUser
+                        ? "bg-[#0F4C81] text-white rounded-br-xs font-medium"
+                        : "bg-white dark:bg-[#1a1d2e] text-gray-800 dark:text-gray-100 rounded-bl-xs border border-gray-100 dark:border-gray-800"
                     }`}
                   >
-                    {msg.time}
+                    <ReactMarkdown
+                      components={{
+                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc pl-4 space-y-1 my-2">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal pl-4 space-y-1 my-2">{children}</ol>,
+                        li: ({ children }) => <li className="text-xs sm:text-sm">{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                        a: ({ href, children }) => (
+                          <a
+                            href={href}
+                            className="inline-flex items-center gap-0.5 text-[#FF6B35] dark:text-[#ff8558] hover:underline font-semibold"
+                            target={href?.startsWith("http") ? "_blank" : undefined}
+                            rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
+                          >
+                            {children}
+                            <ArrowUpRight className="w-3 h-3 inline" />
+                          </a>
+                        ),
+                      }}
+                    >
+                      {m.text}
+                    </ReactMarkdown>
                   </div>
+                  <p
+                    className={`text-[10px] text-gray-400 dark:text-gray-500 px-1 ${
+                      isUser ? "text-right" : "text-left"
+                    }`}
+                  >
+                    {m.time}
+                  </p>
                 </div>
               </div>
             );
           })}
 
-          {/* Typing Indicator */}
+          {/* Typing indicator */}
           {loading && (
-            <div className="flex gap-2.5 items-end animate-message-in">
-              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-[#0F4C81] to-[#FF6B35] flex items-center justify-center shrink-0 text-white shadow-sm mb-1">
+            <div className="flex gap-2.5 max-w-[80%] animate-message-in">
+              <div className="w-8 h-8 rounded-xl bg-[#0F4C81]/10 dark:bg-[#0F4C81]/30 flex items-center justify-center text-[#0F4C81] shrink-0">
                 <Bot className="w-4 h-4" />
               </div>
-              <div className="bg-white dark:bg-[#1E2238] border border-gray-200/70 dark:border-gray-700/60 rounded-2xl rounded-bl-xs px-4 py-3 shadow-sm flex items-center gap-1.5">
-                <span className="text-xs text-gray-500 dark:text-gray-400 mr-1 font-medium">
-                  Roomie is thinking
-                </span>
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-[#0F4C81] dark:bg-sky-400 animate-bounce"
-                  style={{ animationDelay: "0ms" }}
-                />
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-[#0F4C81] dark:bg-sky-400 animate-bounce"
-                  style={{ animationDelay: "150ms" }}
-                />
-                <span
-                  className="w-1.5 h-1.5 rounded-full bg-[#0F4C81] dark:bg-sky-400 animate-bounce"
-                  style={{ animationDelay: "300ms" }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Empty state Quick Reply Suggestions */}
-          {isInitialState && !loading && (
-            <div className="pt-2 animate-message-in">
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#FF6B35]" />
-                Suggested Questions
-              </p>
-              <div className="flex flex-col gap-2">
-                {QUICK_REPLIES.map(({ label, icon: Icon, prompt }) => (
-                  <button
-                    key={label}
-                    onClick={() => sendMessage(prompt)}
-                    className="flex items-center justify-between text-left px-3.5 py-2.5 rounded-xl bg-white dark:bg-[#1E2238] hover:bg-[#0F4C81]/5 dark:hover:bg-[#252a45] text-xs font-medium text-gray-700 dark:text-gray-200 border border-gray-200/80 dark:border-gray-700/70 hover:border-[#0F4C81]/40 dark:hover:border-sky-500/40 shadow-xs hover:shadow-sm transition-all duration-200 group"
-                  >
-                    <span className="flex items-center gap-2">
-                      <Icon className="w-3.5 h-3.5 text-[#0F4C81] dark:text-sky-400 group-hover:scale-110 transition-transform" />
-                      {label}
-                    </span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-[#0F4C81] dark:group-hover:text-sky-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                  </button>
-                ))}
+              <div className="bg-white dark:bg-[#1a1d2e] rounded-2xl rounded-bl-xs px-4 py-3 border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-[#0F4C81] animate-bounce" style={{ animationDelay: "0ms" }} />
+                <div className="w-2 h-2 rounded-full bg-[#0F4C81] animate-bounce" style={{ animationDelay: "150ms" }} />
+                <div className="w-2 h-2 rounded-full bg-[#0F4C81] animate-bounce" style={{ animationDelay: "300ms" }} />
               </div>
             </div>
           )}
@@ -480,60 +463,60 @@ export default function ChatbotWidget() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Quick Suggestion Chips bar when in active conversation */}
-        {!isInitialState && (
-          <div className="px-3 py-2 bg-white/90 dark:bg-[#161829] border-t border-gray-100 dark:border-gray-800/80 flex gap-2 overflow-x-auto no-scrollbar shrink-0">
-            {QUICK_REPLIES.map(({ label, prompt }) => (
-              <button
-                key={label}
-                onClick={() => sendMessage(prompt)}
-                disabled={loading}
-                className="shrink-0 px-3 py-1 bg-gray-100 dark:bg-[#20243d] hover:bg-[#0F4C81]/10 dark:hover:bg-[#2a3052] text-[#0F4C81] dark:text-sky-300 text-[11px] font-medium rounded-full border border-gray-200 dark:border-gray-700/60 hover:border-[#0F4C81]/30 transition-colors disabled:opacity-50"
-              >
-                {label}
-              </button>
-            ))}
+        {/* Quick Replies Panel */}
+        {isInitialState && (
+          <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800/60 bg-white/80 dark:bg-[#151726]/80 shrink-0">
+            <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+              Common Questions
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              {QUICK_REPLIES.map(({ label, icon: Icon, prompt }) => (
+                <button
+                  key={label}
+                  onClick={() => sendMessage(prompt)}
+                  className="flex items-center gap-2 p-2.5 text-xs text-left text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#1c2033] hover:bg-[#0F4C81]/10 dark:hover:bg-[#0F4C81]/20 hover:text-[#0F4C81] dark:hover:text-[#5c93e2] rounded-xl border border-gray-200/60 dark:border-gray-700/60 transition-colors cursor-pointer min-h-[44px]"
+                >
+                  <Icon className="w-3.5 h-3.5 text-[#0F4C81] dark:text-[#5c93e2] shrink-0" />
+                  <span className="truncate">{label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Input Area */}
-        <div className="p-3 bg-white dark:bg-[#17192b] border-t border-gray-200/80 dark:border-gray-800 shrink-0">
+        {/* Chat Input Bar */}
+        <div className="p-3 sm:p-4 bg-white dark:bg-[#151726] border-t border-gray-200 dark:border-gray-800 shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               sendMessage(input);
             }}
-            className="flex items-center gap-2 bg-gray-100 dark:bg-[#20243d] rounded-2xl px-3 py-1.5 border border-gray-200/60 dark:border-gray-700/50 focus-within:border-[#0F4C81] dark:focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-[#0F4C81]/15 transition-all"
+            className="flex items-center gap-2"
           >
             <input
               ref={inputRef}
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={loading ? "Waiting for Roomie..." : "Ask Roomie anything about PGs, rent..."}
+              placeholder="Ask Roomie about PGs, rent, rules..."
               disabled={loading}
-              className="flex-1 bg-transparent text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 outline-none py-1.5 disabled:opacity-50"
+              className="flex-1 px-4 py-3 text-sm rounded-xl bg-gray-50 dark:bg-[#1c2033] border border-gray-200 dark:border-gray-700/80 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-[#0F4C81] dark:focus:border-[#5c93e2] focus:ring-2 focus:ring-[#0F4C81]/10 transition-all min-h-[44px]"
             />
-
             <button
               type="submit"
-              disabled={loading || !input.trim()}
+              disabled={!input.trim() || loading}
               aria-label="Send message"
-              className="w-8 h-8 rounded-xl bg-gradient-to-r from-[#0F4C81] to-[#FF6B35] flex items-center justify-center text-white shadow-sm hover:scale-105 active:scale-95 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed transition-all duration-200 shrink-0"
+              className="w-12 h-12 flex items-center justify-center rounded-xl bg-[#0F4C81] text-white hover:bg-[#0d3f6e] disabled:opacity-40 disabled:hover:bg-[#0F4C81] transition-all cursor-pointer shadow-md shrink-0"
             >
               <Send className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Footer branding */}
-          <div className="mt-1.5 text-center">
-            <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
-              Powered by ApnaKona AI • Safe & Verified Student Living
-            </span>
+          <div className="flex items-center justify-between mt-2 px-1 text-[10px] text-gray-400 dark:text-gray-500">
+            <span>Powered by ApnaKona AI</span>
+            <span>Zero Brokerage • Verified</span>
           </div>
         </div>
       </div>
     </div>
   );
 }
-

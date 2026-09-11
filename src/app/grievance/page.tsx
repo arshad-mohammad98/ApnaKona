@@ -1,23 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle, Clock, ChevronDown, FileText, Send, MessageSquareWarning } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, FileText, Send, MessageSquareWarning } from "lucide-react";
 import { DUMMY_COMPLAINTS } from "@/lib/data/complaints";
 import { DUMMY_LISTINGS } from "@/lib/data/listings";
 import { Complaint } from "@/lib/types";
 
 const STATUS_COLORS: Record<Complaint["status"], string> = {
-  Pending: "bg-yellow-100 text-yellow-700",
-  "Under Review": "bg-blue-100 text-blue-700",
-  Resolved: "bg-green-100 text-green-700",
-  Closed: "bg-gray-100 text-gray-600",
+  Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  "Under Review": "bg-blue-100 text-blue-800 border-blue-200",
+  Resolved: "bg-green-100 text-green-800 border-green-200",
+  Closed: "bg-gray-100 text-gray-700 border-gray-200",
 };
 
 const STATUS_ICONS: Record<Complaint["status"], React.ReactNode> = {
-  Pending: <Clock className="w-4 h-4" />,
-  "Under Review": <AlertCircle className="w-4 h-4" />,
-  Resolved: <CheckCircle className="w-4 h-4" />,
-  Closed: <CheckCircle className="w-4 h-4" />,
+  Pending: <Clock className="w-3.5 h-3.5" />,
+  "Under Review": <AlertCircle className="w-3.5 h-3.5" />,
+  Resolved: <CheckCircle className="w-3.5 h-3.5" />,
+  Closed: <CheckCircle className="w-3.5 h-3.5" />,
 };
 
 export default function GrievancePage() {
@@ -25,216 +25,237 @@ export default function GrievancePage() {
   const [listingForm, setListingForm] = useState({ listingId: "", subject: "", description: "" });
   const [platformForm, setPlatformForm] = useState({ subject: "", description: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [ticketId, setTicketId] = useState("AKG-4821");
   const [complaints] = useState<Complaint[]>(DUMMY_COMPLAINTS);
 
   const handleListingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setTicketId(`AKG-${Math.floor(1000 + Math.random() * 9000)}`);
     setSubmitted(true);
-    setTimeout(() => { setSubmitted(false); setListingForm({ listingId: "", subject: "", description: "" }); }, 3000);
+    setTimeout(() => {
+      setSubmitted(false);
+      setListingForm({ listingId: "", subject: "", description: "" });
+    }, 3500);
   };
+
   const handlePlatformSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setTicketId(`AKG-${Math.floor(1000 + Math.random() * 9000)}`);
     setSubmitted(true);
-    setTimeout(() => { setSubmitted(false); setPlatformForm({ subject: "", description: "" }); }, 3000);
+    setTimeout(() => {
+      setSubmitted(false);
+      setPlatformForm({ subject: "", description: "" });
+    }, 3500);
   };
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB]">
+    <div className="min-h-screen bg-[#F9FAFB] pb-16">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#0F4C81] to-[#0d3f6e] text-white py-12">
+      <div className="bg-gradient-to-r from-[#0F4C81] to-[#0d3f6e] text-white py-10 sm:py-14">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-2">
-            <MessageSquareWarning className="w-6 h-6" />
-            <h1 className="font-display text-2xl font-bold">Grievance Centre</h1>
+            <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center">
+              <MessageSquareWarning className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold">Grievance &amp; Redressal</h1>
           </div>
-          <p className="text-white/70 text-sm">
-            Report issues with listings or the platform. We take every complaint seriously and resolve it within 72 hours.
+          <p className="text-white/80 text-xs sm:text-sm max-w-xl leading-relaxed">
+            Report misleading listings, owner misconduct, or platform issues. We review all complaints and take action within 72 hours.
           </p>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs */}
-        <div className="flex gap-1 bg-white rounded-2xl p-1.5 shadow-card border border-gray-100 mb-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Responsive Tabs */}
+        <div className="flex gap-1.5 bg-white rounded-2xl p-1.5 shadow-card border border-gray-100 mb-8 overflow-x-auto">
           {[
-            { key: "listing", label: "Report a Listing", icon: FileText },
+            { key: "listing", label: "Report Listing", icon: FileText },
             { key: "platform", label: "Report Platform Issue", icon: AlertCircle },
-            { key: "tracker", label: "My Complaints", icon: Clock },
+            { key: "tracker", label: "My Grievances", icon: Clock },
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setTab(key as typeof tab)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                tab === key ? "bg-[#0F4C81] text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
+              className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-3 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer min-h-[44px] ${
+                tab === key
+                  ? "bg-[#0F4C81] text-white shadow-sm"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               }`}
             >
-              <Icon className="w-4 h-4" />
-              <span className="hidden sm:block">{label}</span>
+              <Icon className="w-4 h-4 shrink-0" />
+              <span>{label}</span>
             </button>
           ))}
         </div>
 
-        {/* Success Toast */}
+        {/* Success Alert */}
         {submitted && (
-          <div className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
+          <div className="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 rounded-2xl px-5 py-4 animate-fade-up">
             <CheckCircle className="w-5 h-5 text-green-600 shrink-0" />
             <div>
-              <p className="font-semibold text-green-800 text-sm">Complaint submitted successfully!</p>
-              <p className="text-green-600 text-xs">Our team will review it within 72 hours.</p>
+              <p className="font-bold text-green-900 text-sm">Grievance filed successfully!</p>
+              <p className="text-green-700 text-xs mt-0.5">
+                Ticket #{ticketId} created. You will receive an email update within 72 hours.
+              </p>
             </div>
           </div>
         )}
 
         {/* Form: Report Listing */}
         {tab === "listing" && (
-          <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6">
-            <h2 className="font-display font-semibold text-lg text-[#1A1A2E] mb-1">Report a Listing</h2>
-            <p className="text-gray-500 text-sm mb-6">Has a property owner misled you? Flag their listing here.</p>
-            <form onSubmit={handleListingSubmit} className="space-y-5">
+          <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-8">
+            <h2 className="font-display font-bold text-lg sm:text-xl text-[#1A1A2E] mb-1">
+              Report a Property / Listing
+            </h2>
+            <p className="text-gray-500 text-xs sm:text-sm mb-6">
+              Encountered fake photos, unauthorized rent increases, or safety hazards? Flag it below.
+            </p>
+
+            <form onSubmit={handleListingSubmit} className="space-y-4 sm:space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Listing</label>
-                <div className="relative">
-                  <select
-                    id="grievance-listing-select"
-                    value={listingForm.listingId}
-                    onChange={(e) => setListingForm((f) => ({ ...f, listingId: e.target.value }))}
-                    required
-                    className="w-full pl-4 pr-10 py-3 border border-gray-200 rounded-xl text-sm appearance-none outline-none focus:border-[#0F4C81] bg-white"
-                  >
-                    <option value="">-- Choose a listing --</option>
-                    {DUMMY_LISTINGS.map((l) => (
-                      <option key={l.id} value={l.id}>{l.title} — {l.city}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Subject</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                  Select Associated Property
+                </label>
                 <select
+                  id="grievance-listing-select"
+                  value={listingForm.listingId}
+                  onChange={(e) => setListingForm((f) => ({ ...f, listingId: e.target.value }))}
+                  required
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/15 bg-white min-h-[44px]"
+                >
+                  <option value="">-- Choose property from database --</option>
+                  {DUMMY_LISTINGS.map((l) => (
+                    <option key={l.id} value={l.id}>
+                      {l.title} ({l.locality}, {l.city})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                  Grievance Category / Subject
+                </label>
+                <input
+                  type="text"
                   value={listingForm.subject}
                   onChange={(e) => setListingForm((f) => ({ ...f, subject: e.target.value }))}
+                  placeholder="e.g. Deposit not returned / Room not as depicted"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm appearance-none outline-none focus:border-[#0F4C81] bg-white"
-                >
-                  <option value="">-- Select issue type --</option>
-                  <option>Photos don&apos;t match reality</option>
-                  <option>Incorrect pricing / Hidden charges</option>
-                  <option>Owner not responding after payment</option>
-                  <option>Fraudulent / Fake listing</option>
-                  <option>Harassment or misconduct</option>
-                  <option>Amenities missing</option>
-                  <option>Other</option>
-                </select>
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/15 min-h-[44px]"
+                />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                  Detailed Explanation
+                </label>
                 <textarea
-                  id="grievance-listing-description"
+                  rows={4}
                   value={listingForm.description}
                   onChange={(e) => setListingForm((f) => ({ ...f, description: e.target.value }))}
-                  rows={5}
+                  placeholder="Describe exactly what occurred, including relevant dates and owner communication..."
                   required
-                  placeholder="Describe the issue in detail. Include dates, amounts, and any relevant evidence..."
-                  className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-[#0F4C81] resize-none"
+                  className="w-full p-4 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/15 resize-none"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Attach Evidence <span className="text-gray-400">(optional)</span></label>
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center text-sm text-gray-400 cursor-pointer hover:border-[#0F4C81]/40">
-                  📎 Click to attach screenshots or documents
-                </div>
-              </div>
+
               <button
-                id="grievance-listing-submit-btn"
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F4C81] hover:bg-[#0d3f6e] text-white font-bold rounded-xl text-xs sm:text-sm transition-colors min-h-[46px] cursor-pointer shadow-sm"
               >
-                <Send className="w-4 h-4" /> Submit Complaint
+                <Send className="w-4 h-4" /> Submit Listing Grievance
               </button>
             </form>
           </div>
         )}
 
-        {/* Form: Report Platform */}
+        {/* Form: Platform Issue */}
         {tab === "platform" && (
-          <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6">
-            <h2 className="font-display font-semibold text-lg text-[#1A1A2E] mb-1">Report Platform Issue</h2>
-            <p className="text-gray-500 text-sm mb-6">Bug, UI issue, or a feature request? Let us know.</p>
-            <form onSubmit={handlePlatformSubmit} className="space-y-5">
+          <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-5 sm:p-8">
+            <h2 className="font-display font-bold text-lg sm:text-xl text-[#1A1A2E] mb-1">
+              Report Technical or Platform Issue
+            </h2>
+            <p className="text-gray-500 text-xs sm:text-sm mb-6">
+              Found a bug, broken feature, or account problem on ApnaKona? Let our engineering team know.
+            </p>
+
+            <form onSubmit={handlePlatformSubmit} className="space-y-4 sm:space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Issue Type</label>
-                <select
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                  Issue Topic
+                </label>
+                <input
+                  type="text"
                   value={platformForm.subject}
                   onChange={(e) => setPlatformForm((f) => ({ ...f, subject: e.target.value }))}
+                  placeholder="e.g. Chat widget disconnected / Search filter reset bug"
                   required
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm appearance-none outline-none focus:border-[#0F4C81] bg-white"
-                >
-                  <option value="">-- Select issue type --</option>
-                  <option>Bug / Technical issue</option>
-                  <option>Feature request</option>
-                  <option>Payment issue</option>
-                  <option>Account / Profile issue</option>
-                  <option>Search not working</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
-                <textarea
-                  value={platformForm.description}
-                  onChange={(e) => setPlatformForm((f) => ({ ...f, description: e.target.value }))}
-                  rows={5}
-                  required
-                  placeholder="Describe the issue step-by-step. Include which page or feature is affected..."
-                  className="w-full border border-gray-200 rounded-xl p-3 text-sm outline-none focus:border-[#0F4C81] resize-none"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/15 min-h-[44px]"
                 />
               </div>
+
+              <div>
+                <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-1.5">
+                  Steps to Reproduce
+                </label>
+                <textarea
+                  rows={4}
+                  value={platformForm.description}
+                  onChange={(e) => setPlatformForm((f) => ({ ...f, description: e.target.value }))}
+                  placeholder="Explain what steps you took, what device/browser you're using, and what error occurred..."
+                  required
+                  className="w-full p-4 border border-gray-200 rounded-xl text-xs sm:text-sm outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/15 resize-none"
+                />
+              </div>
+
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-2 py-3 bg-[#0F4C81] hover:bg-[#0d3f6e] text-white font-semibold rounded-xl transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-3.5 px-6 bg-[#0F4C81] hover:bg-[#0d3f6e] text-white font-bold rounded-xl text-xs sm:text-sm transition-colors min-h-[46px] cursor-pointer shadow-sm"
               >
-                <Send className="w-4 h-4" /> Submit Report
+                <Send className="w-4 h-4" /> Submit Technical Report
               </button>
             </form>
           </div>
         )}
 
-        {/* Tracker */}
+        {/* Complaints Tracker */}
         {tab === "tracker" && (
-          <div className="bg-white rounded-3xl shadow-card border border-gray-100 p-6">
-            <h2 className="font-display font-semibold text-lg text-[#1A1A2E] mb-6">My Complaints</h2>
-            {complaints.length > 0 ? (
-              <div className="space-y-4">
-                {complaints.map((c) => (
-                  <div key={c.id} className="border border-gray-100 rounded-2xl p-5 hover:border-[#0F4C81]/20 transition-colors">
-                    <div className="flex items-start justify-between gap-3 mb-2">
-                      <div>
-                        <p className="font-semibold text-sm text-gray-900">{c.subject}</p>
-                        {c.listingName && (
-                          <p className="text-xs text-gray-500 mt-0.5">🏠 {c.listingName}</p>
-                        )}
-                      </div>
-                      <span className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[c.status]}`}>
-                        {STATUS_ICONS[c.status]}
-                        {c.status}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-xs line-clamp-2 mb-3">{c.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-400">
-                      <span>Filed: {c.createdAt}</span>
-                      <span>Updated: {c.updatedAt}</span>
-                      <span className="ml-auto capitalize px-2 py-0.5 bg-gray-100 rounded-full text-gray-500">{c.type} complaint</span>
-                    </div>
+          <div className="space-y-4">
+            <h2 className="font-display font-bold text-lg text-gray-900 mb-4">
+              Your Filed Grievances ({complaints.length})
+            </h2>
+
+            {complaints.map((c) => (
+              <div
+                key={c.id}
+                className="bg-white rounded-3xl p-5 sm:p-6 shadow-card border border-gray-100 space-y-3"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-gray-100">
+                  <div>
+                    <span className="text-[11px] font-mono font-bold text-gray-400 block mb-0.5">
+                      #{c.id} • {c.createdAt}
+                    </span>
+                    <h3 className="font-semibold text-sm sm:text-base text-gray-900">{c.subject}</h3>
                   </div>
-                ))}
+                  <div
+                    className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border self-start sm:self-auto ${
+                      STATUS_COLORS[c.status]
+                    }`}
+                  >
+                    {STATUS_ICONS[c.status]}
+                    <span>{c.status}</span>
+                  </div>
+                </div>
+
+                <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">{c.description}</p>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 text-xs text-gray-400">
+                  <span>Type: {c.type === "listing" ? "Property Flag" : "Platform Report"}</span>
+                  <span className="text-[#0F4C81] font-semibold">Priority: Normal</span>
+                </div>
               </div>
-            ) : (
-              <div className="text-center py-16 text-gray-400">
-                <CheckCircle className="w-12 h-12 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No complaints filed yet. You&apos;re all good! 🎉</p>
-              </div>
-            )}
+            ))}
           </div>
         )}
       </div>
