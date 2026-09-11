@@ -17,7 +17,7 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-[#0F4C81] via-[#0d3f6e] to-[#1a1a2e] min-h-[88vh] flex items-center">
+    <section className="relative overflow-hidden bg-gradient-to-br from-[#0F4C81] via-[#0d3f6e] to-[#1a1a2e] min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex items-center">
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#FF6B35]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#0F4C81]/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3" />
@@ -31,7 +31,7 @@ export default function Hero() {
         }}
       />
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-24 sm:pt-16 sm:pb-28 lg:pt-20 lg:pb-32 w-full">
         <div className="max-w-3xl">
           {/* Pill badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6 animate-fade-up">
