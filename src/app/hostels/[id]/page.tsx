@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+import GoogleMapView from "@/components/ui/GoogleMapView";
 
 const AMENITY_ICONS: Record<string, React.ReactNode> = {
   WiFi: <Wifi className="w-4 h-4" />,
@@ -329,16 +330,22 @@ export default function HostelDetailPage({ params }: { params: Promise<{ id: str
               <p className="text-gray-500 text-xs sm:text-sm mb-4">
                 Located in {listing.locality}, {listing.city}. Close to campus transit and local amenities.
               </p>
-              <div className="rounded-2xl overflow-hidden h-64 sm:h-80 border border-gray-100 bg-gray-100">
-                <iframe
-                  src={`https://www.google.com/maps?q=${listing.lat},${listing.lng}&z=15&output=embed`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  title={`Map showing ${listing.title}`}
-                  className="w-full h-full"
+              <div className="rounded-2xl overflow-hidden h-72 sm:h-96 border border-gray-100 bg-gray-100 relative">
+                <GoogleMapView
+                  lat={listing.lat}
+                  lng={listing.lng}
+                  zoom={15}
+                  title={listing.title}
+                  markers={[
+                    {
+                      id: listing.id,
+                      lat: listing.lat,
+                      lng: listing.lng,
+                      title: listing.title,
+                      price: listing.price,
+                      locality: listing.locality,
+                    },
+                  ]}
                 />
               </div>
             </div>

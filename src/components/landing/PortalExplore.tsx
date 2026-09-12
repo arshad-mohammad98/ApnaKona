@@ -1,24 +1,105 @@
 "use client";
 
-import { useState } from "react";
-import { MapPin, Calculator, Navigation, Bus, ShoppingBag, Shield, ArrowRight } from "lucide-react";
+import { useState, useMemo } from "react";
+import {
+  MapPin,
+  Calculator,
+  Navigation,
+  Bus,
+  ShoppingBag,
+  Shield,
+  ArrowRight,
+  Search,
+  LocateFixed,
+  Loader2,
+  X,
+  Filter,
+} from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-
-const CITIES = [
-  { name: "Bangalore", lat: 12.9716, lng: 77.5946, colleges: "IISc, Christ, RVCE" },
-  { name: "Pune", lat: 18.5204, lng: 73.8567, colleges: "Symbiosis, COEP, Ferguson" },
-  { name: "Delhi NCR", lat: 28.6139, lng: 77.2090, colleges: "DU, IIT Delhi, DTU" },
-  { name: "Mumbai", lat: 19.0760, lng: 72.8777, colleges: "IIT Bombay, NMIMS, Xavier's" },
-  { name: "Hyderabad", lat: 17.3850, lng: 78.4867, colleges: "BITS Hyd, Osmania, IIIT" },
-  { name: "Chennai", lat: 13.0827, lng: 80.2707, colleges: "IIT Madras, Anna Univ, SRM" },
-];
+import { CITIES, CITY_AREAS, AreaInfo, CityInfo, findClosestCity } from "@/lib/data/areas";
+import GoogleMapView from "@/components/ui/GoogleMapView";
 
 export default function PortalExplore() {
-  const [selectedCity, setSelectedCity] = useState(CITIES[0]);
+  const [selectedCity, setSelectedCity] = useState<CityInfo>(CITIES[0]);
+  const [selectedArea, setSelectedArea] = useState<AreaInfo | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
+  const [userLocation, setUserLocation] = useState<{
+    lat: number;
+    lng: number;
+    distanceKm?: number;
+  } | null>(null);
   const [fromPlace, setFromPlace] = useState("");
   const [toPlace, setToPlace] = useState("");
   const [distResult, setDistResult] = useState<string | null>(null);
+
+  const currentAreas = CITY_AREAS[selectedCity.name] || [];
+
+  const handleAutoLocate = () => {
+    if (!navigator.geolocation) return;
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        const { city, distanceKm } = findClosestCity(latitude, longitude);
+
+        // Reverse geocode to get exact neighborhood & city
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+            { headers: { "Accept-Language": "en" } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const addr = data.address || {};
+            const neighborhood = addr.suburb || addr.neighbourhood || addr.residential || "";
+            const cityName = addr.city || addr.town || addr.state_district || "";
+            if (neighborhood && cityName) {
+              setSearchQuery(`${neighborhood}, ${cityName}`);
+            } else if (cityName) {
+              setSearchQuery(cityName);
+            } else if (data.display_name) {
+              setSearchQuery(data.display_name.split(",").slice(0, 2).join(",").trim());
+            }
+          }
+        } catch {
+          setSearchQuery(city.name);
+        }
+
+        setSelectedCity(city);
+        setSelectedArea(null);
+        setUserLocation({ lat: latitude, lng: longitude, distanceKm });
+        setIsLocating(false);
+      },
+      () => {
+        setIsLocating(false);
+      },
+      { timeout: 10000 }
+    );
+  };
+
+  const mapTarget = useMemo(() => {
+    if (userLocation) {
+      return {
+        query: `${userLocation.lat},${userLocation.lng}`,
+        zoom: 15,
+        title: `Your Location (Near ${selectedCity.name})`,
+      };
+    }
+    if (selectedArea) {
+      return {
+        query: `${selectedArea.lat},${selectedArea.lng}`,
+        zoom: 15,
+        title: `${selectedArea.name}, ${selectedCity.name}`,
+      };
+    }
+    return {
+      query: `${selectedCity.lat},${selectedCity.lng}`,
+      zoom: 13,
+      title: `${selectedCity.name} — Student Hotspots`,
+    };
+  }, [userLocation, selectedArea, selectedCity]);
 
   const calcDistance = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +113,7 @@ export default function PortalExplore() {
     <section id="explore" className="py-16 sm:py-24 bg-white border-t border-gray-100 scroll-mt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <span className="inline-block px-3.5 py-1 bg-purple-50 text-purple-700 rounded-full text-xs sm:text-sm font-semibold mb-3">
               Interactive Map &amp; Transit
@@ -52,37 +133,120 @@ export default function PortalExplore() {
           </Link>
         </div>
 
+        {/* ── SEARCH PALETTE & AUTO-LOCATE BUTTON ── */}
+        <div className="mb-6">
+          <div className="flex items-center bg-[#F9FAFB] rounded-2xl border-2 border-gray-200/80 focus-within:border-[#0F4C81] focus-within:bg-white shadow-xs p-1.5 transition-all">
+            <div className="pl-3 pr-2 text-gray-400">
+              <Search className="w-4 h-4" />
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search neighborhood or campus (e.g. Koramangala, Powai, FC Road)..."
+              className="w-full py-2 text-xs sm:text-sm bg-transparent outline-none text-gray-900 placeholder-gray-400 font-medium"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="p-1 text-gray-400 hover:text-gray-600 rounded-md mr-1 cursor-pointer"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+            <div className="h-5 w-px bg-gray-200 mx-1" />
+            <button
+              onClick={handleAutoLocate}
+              disabled={isLocating}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                userLocation
+                  ? "bg-emerald-600 text-white"
+                  : "bg-white hover:bg-[#0F4C81] text-[#0F4C81] hover:text-white border border-gray-200/80"
+              }`}
+            >
+              {isLocating ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <LocateFixed className="w-3.5 h-3.5" />
+              )}
+              <span className="hidden sm:inline">
+                {userLocation ? "Located" : "Fetch Location"}
+              </span>
+            </button>
+          </div>
+
+          {/* Direct Area & City Access Filter Box */}
+          <div className="mt-3 p-4 bg-[#F9FAFB] rounded-2xl border border-gray-100 space-y-2.5">
+            {/* City Tabs */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap pb-2 border-b border-gray-200/60">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1 shrink-0">
+                <MapPin className="w-3 h-3 text-[#0F4C81]" /> City:
+              </span>
+              {CITIES.map((c) => (
+                <button
+                  key={c.name}
+                  onClick={() => {
+                    setSelectedCity(c);
+                    setSelectedArea(null);
+                    setUserLocation(null);
+                    setDistResult(null);
+                  }}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                    selectedCity.name === c.name
+                      ? "bg-[#0F4C81] text-white shadow-2xs"
+                      : "bg-white text-gray-700 hover:bg-gray-200 border border-gray-200/60"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Area Pills */}
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+              <span className="text-[11px] font-bold text-gray-500 flex items-center gap-1 mr-1">
+                <Filter className="w-3 h-3 text-[#0F4C81]" /> Direct Areas ({selectedCity.name}):
+              </span>
+              <button
+                onClick={() => {
+                  setSelectedArea(null);
+                  setUserLocation(null);
+                }}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                  !selectedArea && !userLocation
+                    ? "bg-[#0F4C81] text-white shadow-2xs"
+                    : "bg-white text-gray-700 hover:bg-gray-200 border border-gray-200/60"
+                }`}
+              >
+                All {selectedCity.name}
+              </button>
+              {currentAreas.map((area) => {
+                const active = selectedArea?.name === area.name;
+                return (
+                  <button
+                    key={area.name}
+                    onClick={() => {
+                      setSelectedArea(area);
+                      setUserLocation(null);
+                      setSearchQuery(`${area.name}, ${selectedCity.name}`);
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-xs transition-colors cursor-pointer border ${
+                      active
+                        ? "bg-[#0F4C81] text-white border-[#0F4C81] font-semibold shadow-2xs"
+                        : "bg-white text-gray-700 hover:bg-gray-100 border-gray-200/70"
+                    }`}
+                  >
+                    {area.name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Controls Column (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            {/* City Switcher */}
-            <div className="bg-[#F9FAFB] rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xs">
-              <h3 className="font-display font-semibold text-sm sm:text-base text-gray-900 mb-3 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#0F4C81]" /> Select Student Hub City
-              </h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {CITIES.map((c) => (
-                  <button
-                    key={c.name}
-                    onClick={() => {
-                      setSelectedCity(c);
-                      setDistResult(null);
-                    }}
-                    className={`p-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left min-h-[44px] flex flex-col justify-center ${
-                      selectedCity.name === c.name
-                        ? "bg-[#0F4C81] text-white shadow-xs"
-                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200/70"
-                    }`}
-                  >
-                    <span className="font-bold">{c.name}</span>
-                    <span className={`text-[10px] truncate ${selectedCity.name === c.name ? "text-white/80" : "text-gray-400"}`}>
-                      {c.colleges.split(",")[0]}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {/* Distance & Transit Calculator */}
             <div className="bg-[#F9FAFB] rounded-3xl p-5 sm:p-6 border border-gray-100 shadow-xs">
               <h3 className="font-display font-semibold text-sm sm:text-base text-gray-900 mb-3 flex items-center gap-2">
@@ -151,21 +315,18 @@ export default function PortalExplore() {
               <div className="bg-[#0F4C81] px-5 py-3.5 text-white flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-[#FF6B35]" />
-                  <span className="font-semibold text-xs sm:text-sm">
-                    {selectedCity.name} — Student Hotspots
+                  <span className="font-semibold text-xs sm:text-sm truncate">
+                    {mapTarget.title}
                   </span>
                 </div>
                 <Badge variant="cyan">Near Top Campuses</Badge>
               </div>
-              <div className="flex-1 w-full bg-gray-100">
-                <iframe
-                  src={`https://www.google.com/maps?q=${selectedCity.lat},${selectedCity.lng}&z=13&output=embed`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  title={`Map showing ${selectedCity.name}`}
+              <div className="flex-1 w-full relative bg-gray-100 min-h-[380px]">
+                <GoogleMapView
+                  lat={userLocation ? userLocation.lat : selectedArea ? selectedArea.lat : selectedCity.lat}
+                  lng={userLocation ? userLocation.lng : selectedArea ? selectedArea.lng : selectedCity.lng}
+                  zoom={mapTarget.zoom}
+                  title={mapTarget.title}
                   className="w-full h-full"
                 />
               </div>

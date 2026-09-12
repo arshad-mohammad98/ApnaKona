@@ -19,11 +19,11 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary: "bg-[#0F4C81] hover:bg-[#0d3f6e] text-white focus:ring-[#0F4C81]/40 shadow-sm",
-      secondary: "bg-gray-100 hover:bg-gray-200 text-gray-800 focus:ring-gray-300",
+      secondary: "bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-100 focus:ring-gray-300",
       accent: "bg-[#FF6B35] hover:bg-[#e85a22] text-white focus:ring-[#FF6B35]/40 shadow-sm shadow-orange-500/20",
-      outline: "border border-gray-200 hover:border-[#0F4C81] text-gray-700 hover:text-[#0F4C81] bg-white focus:ring-[#0F4C81]/30",
-      ghost: "text-gray-600 hover:bg-gray-100 hover:text-[#0F4C81] focus:ring-gray-200",
-      danger: "bg-red-500 hover:bg-red-600 text-white focus:ring-red-400 shadow-sm",
+      outline: "border border-gray-200 hover:border-[#0F4C81] text-gray-800 hover:text-[#0F4C81] bg-white dark:bg-slate-800/90 dark:border-slate-700 dark:text-slate-100 dark:hover:text-sky-300 dark:hover:border-sky-500/50 focus:ring-[#0F4C81]/30",
+      ghost: "text-gray-700 hover:bg-gray-100 hover:text-[#0F4C81] dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-sky-300 focus:ring-gray-200",
+      danger: "bg-red-600 hover:bg-red-700 text-white focus:ring-red-400 shadow-sm",
     };
 
     return (

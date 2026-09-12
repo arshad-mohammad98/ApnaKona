@@ -23,7 +23,7 @@ import FilterSidebar, {
 
 type SortOption = "price-asc" | "price-desc" | "rating" | "newest";
 
-const POPULAR_CITIES = ["All", "Bangalore", "Pune", "Delhi", "Mumbai", "Hyderabad", "Chennai"];
+const POPULAR_CITIES = ["All", "Bangalore", "Pune", "Delhi", "Mumbai", "Hyderabad", "Chennai", "Greater Noida"];
 
 function HostelsContent() {
   const searchParams = useSearchParams();

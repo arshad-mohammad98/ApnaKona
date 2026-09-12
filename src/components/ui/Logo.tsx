@@ -32,7 +32,7 @@ export default function Logo({
   // Colors
   const primaryColor = mono ? "currentColor" : "#0F4C81";
   const accentColor = mono ? "currentColor" : "#FF6B35";
-  const textColorPrimary = theme === "dark" ? "text-white" : "text-[#1A1A2E]";
+  const textColorPrimary = theme === "dark" ? "text-white" : "text-[#1A1A2E] dark:text-white";
   const textColorAccent = "text-[#FF6B35]";
 
   // The Icon SVG: Modern geometric house silhouette with overlapping community roof & arched corner door

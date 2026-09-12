@@ -18,13 +18,13 @@ export function Badge({
   };
 
   const variantStyles = {
-    primary: "bg-[#0F4C81]/10 text-[#0F4C81] border border-[#0F4C81]/20",
-    accent: "bg-orange-50 text-orange-600 border border-orange-200",
-    success: "bg-green-50 text-green-700 border border-green-200",
-    warning: "bg-yellow-50 text-yellow-700 border border-yellow-200",
-    cyan: "bg-cyan-50 text-cyan-700 border border-cyan-200",
-    purple: "bg-purple-50 text-purple-700 border border-purple-200",
-    neutral: "bg-gray-100 text-gray-700 border border-gray-200",
+    primary: "bg-[#0F4C81]/10 text-[#0F4C81] border border-[#0F4C81]/20 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30",
+    accent: "bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/60 dark:text-orange-300 dark:border-orange-800/50",
+    success: "bg-emerald-50 text-emerald-800 border border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/50",
+    warning: "bg-amber-50 text-amber-900 border border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/50",
+    cyan: "bg-cyan-50 text-cyan-800 border border-cyan-200 dark:bg-cyan-950/60 dark:text-cyan-300 dark:border-cyan-800/50",
+    purple: "bg-purple-50 text-purple-800 border border-purple-200 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/50",
+    neutral: "bg-gray-100 text-gray-800 border border-gray-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700",
   };
 
   return (

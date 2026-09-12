@@ -1,0 +1,46 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start ApnaKona",
+      "type": "shell",
+      "command": "/bin/bash",
+      "args": ["${workspaceFolder}/run.sh"],
+      "options": {
+        "env": {
+          "PATH": "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env:PATH}"
+        }
+      },
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "Push to GitHub",
+      "type": "shell",
+      "command": "/bin/bash",
+      "args": ["${workspaceFolder}/push.sh"],
+      "options": {
+        "env": {
+          "PATH": "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${env:PATH}"
+        }
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "focus": true
+      }
+    }
+  ]
+}

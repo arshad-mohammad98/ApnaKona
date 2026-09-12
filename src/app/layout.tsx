@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import ChatbotWidget from "@/components/layout/ChatbotWidget";
 import { AuthProvider } from "@/lib/context/AuthContext";
+import { ThemeProvider } from "@/lib/context/ThemeContext";
 
 export const metadata: Metadata = {
   title: "ApnaKona — Find PG, Hostel & Flats Near Your College",
@@ -24,14 +25,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen flex flex-col bg-surface">
-        <AuthProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <ChatbotWidget />
-        </AuthProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col bg-surface transition-colors duration-200">
+        <ThemeProvider>
+          <AuthProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <ChatbotWidget />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
