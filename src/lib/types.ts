@@ -20,7 +20,17 @@ export interface User {
 }
 
 export type RoomType = "PG" | "Hostel" | "Flat";
-export type SharingType = "Single" | "Double" | "Triple";
+export type SharingType =
+  | "Single"
+  | "Double"
+  | "Triple"
+  | "2 Seater"
+  | "3 Seater"
+  | "4 Seater"
+  | "2 BHK"
+  | "3 BHK"
+  | "4 BHK"
+  | string;
 export type GenderPref = "Boys" | "Girls" | "Co-Ed";
 export type FurnishingStatus = "Fully Furnished" | "Semi Furnished" | "Unfurnished";
 

@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Home, Search, Map, Users, MessageSquare, Mail, Phone, Globe, Share2, Briefcase } from "lucide-react";
+import { Home, Search, Map, Users, MessageSquare, Mail, Phone } from "lucide-react";
+import { FaInstagram, FaXTwitter, FaPhone } from "react-icons/fa6";
+import { SiGmail } from "react-icons/si";
 import Logo from "@/components/ui/Logo";
+import { SITE_CONTACT, SITE_SOCIAL } from "@/lib/constants";
 
 export default function Footer() {
   return (
@@ -17,27 +20,42 @@ export default function Footer() {
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm">
               India&apos;s most trusted platform for students to find safe, affordable, and verified accommodation near top colleges.
             </p>
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-2.5 pt-2">
               <a
-                href="#"
-                aria-label="Share ApnaKona"
-                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-[#FF6B35] transition-colors"
+                href={SITE_SOCIAL.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="ApnaKona on Instagram"
+                title="Follow us on Instagram (@apna._kona)"
+                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[40px] min-w-[40px]"
               >
-                <Share2 className="w-4 h-4" />
+                <FaInstagram className="w-4 h-4" />
               </a>
               <a
-                href="#"
-                aria-label="Website"
-                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-[#FF6B35] transition-colors"
+                href={SITE_SOCIAL.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="ApnaKona on Twitter / X"
+                title="Follow us on X / Twitter"
+                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-black hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[40px] min-w-[40px] border border-transparent hover:border-white/20"
               >
-                <Globe className="w-4 h-4" />
+                <FaXTwitter className="w-4 h-4" />
               </a>
               <a
-                href="#"
-                aria-label="Careers"
-                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center hover:bg-[#FF6B35] transition-colors"
+                href={SITE_CONTACT.emailHref}
+                aria-label="Email ApnaKona on Gmail"
+                title={`Email: ${SITE_CONTACT.email}`}
+                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#EA4335] hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[40px] min-w-[40px]"
               >
-                <Briefcase className="w-4 h-4" />
+                <SiGmail className="w-4 h-4" />
+              </a>
+              <a
+                href={SITE_CONTACT.phoneHref}
+                aria-label="Call ApnaKona Helpline"
+                title={`Call: ${SITE_CONTACT.phoneDisplay}`}
+                className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#0F4C81] hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[40px] min-w-[40px]"
+              >
+                <FaPhone className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
@@ -98,24 +116,68 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">Contact & Support</h3>
+            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">Contact Us</h3>
             <div className="space-y-3">
               <a
-                href="mailto:help@apnakona.in"
-                className="flex items-center gap-2.5 text-gray-400 hover:text-[#FF6B35] text-xs sm:text-sm transition-colors py-1"
+                href={SITE_CONTACT.emailHref}
+                className="flex items-center gap-2.5 text-gray-400 hover:text-[#FF6B35] text-xs sm:text-sm transition-colors py-1 break-all"
               >
-                <Mail className="w-4 h-4 shrink-0" />
-                help@apnakona.in
+                <Mail className="w-4 h-4 shrink-0 text-[#FF6B35]" />
+                {SITE_CONTACT.email}
               </a>
               <a
-                href="tel:+918000000000"
+                href={SITE_CONTACT.phoneHref}
                 className="flex items-center gap-2.5 text-gray-400 hover:text-[#FF6B35] text-xs sm:text-sm transition-colors py-1"
               >
-                <Phone className="w-4 h-4 shrink-0" />
-                +91 80000 00000
+                <Phone className="w-4 h-4 shrink-0 text-[#FF6B35]" />
+                {SITE_CONTACT.phoneDisplay}
               </a>
             </div>
-            <div className="mt-6">
+
+            {/* Social Media Links */}
+            <div className="mt-4 pt-3.5 border-t border-white/10">
+              <p className="text-xs text-gray-400 mb-2.5 font-medium">Follow Us</p>
+              <div className="flex items-center gap-2">
+                <a
+                  href={SITE_SOCIAL.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow ApnaKona on Instagram"
+                  title="Follow us on Instagram (@apna._kona)"
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gradient-to-tr hover:from-[#f09433] hover:via-[#dc2743] hover:to-[#bc1888] hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[36px] min-w-[36px]"
+                >
+                  <FaInstagram className="w-4 h-4" />
+                </a>
+                <a
+                  href={SITE_SOCIAL.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Follow ApnaKona on Twitter/X"
+                  title="Follow us on Twitter/X"
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-black hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[36px] min-w-[36px] border border-transparent hover:border-white/20"
+                >
+                  <FaXTwitter className="w-4 h-4" />
+                </a>
+                <a
+                  href={SITE_CONTACT.emailHref}
+                  aria-label="Send us an Email"
+                  title={`Email us: ${SITE_CONTACT.email}`}
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#EA4335] hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[36px] min-w-[36px]"
+                >
+                  <SiGmail className="w-4 h-4" />
+                </a>
+                <a
+                  href={SITE_CONTACT.phoneHref}
+                  aria-label="Call ApnaKona Support"
+                  title={`Call us: ${SITE_CONTACT.phoneDisplay}`}
+                  className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-[#0F4C81] hover:scale-105 active:scale-95 transition-all cursor-pointer min-h-[36px] min-w-[36px]"
+                >
+                  <FaPhone className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+
+            <div className="mt-5">
               <p className="text-xs text-gray-400 mb-2 font-medium">Get Campus Housing Updates</p>
               <form onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row gap-2 max-w-sm">
                 <input

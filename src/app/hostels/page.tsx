@@ -17,6 +17,7 @@ import ListingCard from "@/components/hostels/ListingCard";
 import FilterSidebar, {
   FilterState,
   INITIAL_FILTERS,
+  FilterCounts,
 } from "@/components/hostels/FilterSidebar";
 
 type SortOption = "price-asc" | "price-desc" | "rating" | "newest";
@@ -44,7 +45,7 @@ function HostelsContent() {
       setSearchTerm(qParam);
     }
     if (typeParam) {
-      setFilters((prev) => ({ ...prev, roomType: typeParam }));
+      setFilters((prev) => ({ ...prev, roomTypes: [typeParam] }));
     }
   }, [searchParams]);
 
@@ -57,10 +58,63 @@ function HostelsContent() {
     setSearchTerm("");
   };
 
+  // Real-time counts calculation for badges
+  const filterCounts: FilterCounts = useMemo(() => {
+    const counts: FilterCounts = {
+      roomType: { PG: 0, Hostel: 0, Flat: 0 },
+      sharingType: {
+        "2 Seater": 0,
+        "3 Seater": 0,
+        "4 Seater": 0,
+        "2 BHK": 0,
+        "3 BHK": 0,
+        "4 BHK": 0,
+      },
+      gender: { Boys: 0, Girls: 0, "Co-Ed": 0 },
+      furnishingStatus: {
+        "Fully Furnished": 0,
+        "Semi Furnished": 0,
+        Unfurnished: 0,
+      },
+      acTypes: { AC: 0, "Non-AC": 0 },
+    };
+
+    DUMMY_LISTINGS.forEach((l) => {
+      // If city is selected, count within city
+      if (filters.city && filters.city !== "All") {
+        if (!l.city.toLowerCase().includes(filters.city.toLowerCase())) return;
+      }
+
+      if (counts.roomType[l.roomType] !== undefined) {
+        counts.roomType[l.roomType]++;
+      }
+
+      if (counts.sharingType[l.sharingType] !== undefined) {
+        counts.sharingType[l.sharingType]++;
+      }
+
+      if (counts.gender[l.genderPref] !== undefined) {
+        counts.gender[l.genderPref]++;
+      }
+
+      if (counts.furnishingStatus[l.furnishingStatus] !== undefined) {
+        counts.furnishingStatus[l.furnishingStatus]++;
+      }
+
+      if (l.isAC) {
+        counts.acTypes["AC"]++;
+      } else {
+        counts.acTypes["Non-AC"]++;
+      }
+    });
+
+    return counts;
+  }, [filters.city]);
+
   // Filter and Sort listings
   const filteredListings = useMemo(() => {
     return DUMMY_LISTINGS.filter((l: Listing) => {
-      // Search term
+      // 1. Search term
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
         const matchTitle = l.title.toLowerCase().includes(query);
@@ -70,42 +124,88 @@ function HostelsContent() {
         if (!matchTitle && !matchLoc && !matchCity && !matchDesc) return false;
       }
 
-      // City
+      // 2. City
       if (filters.city && filters.city !== "All") {
         if (!l.city.toLowerCase().includes(filters.city.toLowerCase())) return false;
       }
 
-      // Room Type
-      if (filters.roomType && l.roomType !== filters.roomType) return false;
+      // 3. Room Type (Accommodation Type: multi-select)
+      if (filters.roomTypes.length > 0) {
+        if (!filters.roomTypes.includes(l.roomType)) return false;
+      }
 
-      // Sharing Type
-      if (filters.sharingType && l.sharingType !== filters.sharingType) return false;
+      // 4. Dynamic Sharing Type
+      if (filters.sharingTypes.length > 0) {
+        const isSeater = (s: string) => s.toLowerCase().includes("seater");
+        const isBhk = (s: string) => s.toLowerCase().includes("bhk");
 
-      // Gender
+        const selectedSeaters = filters.sharingTypes.filter(isSeater);
+        const selectedBhks = filters.sharingTypes.filter(isBhk);
+
+        if (l.roomType === "PG" || l.roomType === "Hostel") {
+          // Seater filters apply to PG/Hostel
+          if (selectedSeaters.length > 0) {
+            const match = selectedSeaters.some((s) => {
+              if (l.sharingType === s) return true;
+              if (s === "2 Seater" && (l.sharingType === "Double" || l.sharingType === "2 Seater")) return true;
+              if (s === "3 Seater" && (l.sharingType === "Triple" || l.sharingType === "3 Seater")) return true;
+              if (s === "4 Seater" && (l.sharingType === "Quad" || l.sharingType === "4 Seater")) return true;
+              return false;
+            });
+            if (!match) return false;
+          } else if (selectedBhks.length > 0) {
+            // Only BHK was chosen, so PG/Hostel does not match
+            return false;
+          }
+        } else if (l.roomType === "Flat") {
+          // BHK filters apply to Flat
+          if (selectedBhks.length > 0) {
+            const match = selectedBhks.some((s) => {
+              if (l.sharingType === s) return true;
+              const sClean = s.toLowerCase().replace(/\s+/g, "");
+              const titleClean = l.title.toLowerCase().replace(/\s+/g, "");
+              return titleClean.includes(sClean);
+            });
+            if (!match) return false;
+          } else if (selectedSeaters.length > 0) {
+            // Only seater was chosen, so Flat does not match
+            return false;
+          }
+        } else {
+          if (!filters.sharingTypes.includes(l.sharingType)) return false;
+        }
+      }
+
+      // 5. Gender Preference
       if (filters.gender && l.genderPref !== filters.gender) return false;
 
-      // Furnishing
-      if (filters.furnishingStatus && l.furnishingStatus !== filters.furnishingStatus) return false;
+      // 6. Furnishing Status
+      if (filters.furnishingStatuses.length > 0) {
+        if (!filters.furnishingStatuses.includes(l.furnishingStatus)) return false;
+      }
 
-      // Price
-      if (l.price > filters.maxPrice) return false;
+      // 7. Budget (Min & Max Range)
+      if (l.price < filters.minPrice || l.price > filters.maxPrice) return false;
 
-      // AC
-      if (filters.acOnly && !l.isAC) return false;
+      // 8. AC / Non-AC
+      if (filters.acTypes.length === 1) {
+        if (filters.acTypes[0] === "AC" && !l.isAC) return false;
+        if (filters.acTypes[0] === "Non-AC" && l.isAC) return false;
+      }
 
-      // Mess
+      // 9. Move-in Date
+      if (filters.moveInDate) {
+        if (!l.available) return false;
+        if (l.postedAt && l.postedAt > filters.moveInDate) return false;
+      }
+
+      // 10. Meals & Policies
       if (filters.messIncluded && !l.hasMess) return false;
-
-      // Tiffin
       if (filters.tiffinService && !l.hasTiffin) return false;
-
-      // Curfew
       if (filters.noCurfew && l.hasCurfew) return false;
-
-      // Visitor
       if (filters.visitorAllowed && !l.visitorAllowed) return false;
 
-      // Amenities
+      // 11. Amenities
       if (filters.amenities.length > 0) {
         const hasAll = filters.amenities.every((a) => l.amenities.includes(a));
         if (!hasAll) return false;
@@ -121,22 +221,141 @@ function HostelsContent() {
     });
   }, [searchTerm, filters, sort]);
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    if (filters.city && filters.city !== "All") count++;
-    if (filters.roomType) count++;
-    if (filters.sharingType) count++;
-    if (filters.gender) count++;
-    if (filters.furnishingStatus) count++;
-    if (filters.maxPrice < 25000) count++;
-    if (filters.acOnly) count++;
-    if (filters.messIncluded) count++;
-    if (filters.tiffinService) count++;
-    if (filters.noCurfew) count++;
-    if (filters.visitorAllowed) count++;
-    count += filters.amenities.length;
-    return count;
+  // List of active filter chips
+  const appliedChips = useMemo(() => {
+    const chips: { id: string; label: string; onRemove: () => void }[] = [];
+
+    if (filters.city && filters.city !== "All") {
+      chips.push({
+        id: `city-${filters.city}`,
+        label: `City: ${filters.city}`,
+        onRemove: () => updateFilter("city", ""),
+      });
+    }
+
+    filters.roomTypes.forEach((t) => {
+      chips.push({
+        id: `roomType-${t}`,
+        label: t,
+        onRemove: () =>
+          updateFilter(
+            "roomTypes",
+            filters.roomTypes.filter((x) => x !== t)
+          ),
+      });
+    });
+
+    filters.sharingTypes.forEach((s) => {
+      chips.push({
+        id: `sharingType-${s}`,
+        label: s,
+        onRemove: () =>
+          updateFilter(
+            "sharingTypes",
+            filters.sharingTypes.filter((x) => x !== s)
+          ),
+      });
+    });
+
+    if (filters.minPrice > 3000 || filters.maxPrice < 30000) {
+      chips.push({
+        id: "budget",
+        label: `₹${(filters.minPrice / 1000).toFixed(0)}k – ₹${(filters.maxPrice / 1000).toFixed(0)}k`,
+        onRemove: () => {
+          updateFilter("minPrice", 3000);
+          updateFilter("maxPrice", 30000);
+        },
+      });
+    }
+
+    filters.acTypes.forEach((ac) => {
+      chips.push({
+        id: `ac-${ac}`,
+        label: ac,
+        onRemove: () =>
+          updateFilter(
+            "acTypes",
+            filters.acTypes.filter((x) => x !== ac)
+          ),
+      });
+    });
+
+    if (filters.moveInDate) {
+      chips.push({
+        id: "moveInDate",
+        label: `Move-in: ${filters.moveInDate}`,
+        onRemove: () => updateFilter("moveInDate", ""),
+      });
+    }
+
+    filters.furnishingStatuses.forEach((f) => {
+      chips.push({
+        id: `furnishing-${f}`,
+        label: f,
+        onRemove: () =>
+          updateFilter(
+            "furnishingStatuses",
+            filters.furnishingStatuses.filter((x) => x !== f)
+          ),
+      });
+    });
+
+    if (filters.gender) {
+      chips.push({
+        id: `gender-${filters.gender}`,
+        label: `${filters.gender} Only`,
+        onRemove: () => updateFilter("gender", ""),
+      });
+    }
+
+    if (filters.messIncluded) {
+      chips.push({
+        id: "mess",
+        label: "Mess Included",
+        onRemove: () => updateFilter("messIncluded", false),
+      });
+    }
+
+    if (filters.tiffinService) {
+      chips.push({
+        id: "tiffin",
+        label: "Tiffin Available",
+        onRemove: () => updateFilter("tiffinService", false),
+      });
+    }
+
+    if (filters.noCurfew) {
+      chips.push({
+        id: "curfew",
+        label: "No Curfew",
+        onRemove: () => updateFilter("noCurfew", false),
+      });
+    }
+
+    if (filters.visitorAllowed) {
+      chips.push({
+        id: "visitor",
+        label: "Visitors Allowed",
+        onRemove: () => updateFilter("visitorAllowed", false),
+      });
+    }
+
+    filters.amenities.forEach((a) => {
+      chips.push({
+        id: `amenity-${a}`,
+        label: a,
+        onRemove: () =>
+          updateFilter(
+            "amenities",
+            filters.amenities.filter((x) => x !== a)
+          ),
+      });
+    });
+
+    return chips;
   }, [filters]);
+
+  const activeFilterCount = appliedChips.length;
 
   return (
     <div className="min-h-screen bg-[#F9FAFB] pb-16">
@@ -195,7 +414,7 @@ function HostelsContent() {
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Controls Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-2">
             <span className="font-display font-bold text-gray-900 text-lg sm:text-xl">
               {filteredListings.length} {filteredListings.length === 1 ? "Property" : "Properties"} Available
@@ -210,8 +429,9 @@ function HostelsContent() {
           <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
             {/* Mobile Filter Toggle Button */}
             <button
+              type="button"
               onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 shadow-xs cursor-pointer"
+              className="lg:hidden flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-xs sm:text-sm font-semibold text-gray-700 shadow-xs cursor-pointer active:scale-95 transition-all"
             >
               <SlidersHorizontal className="w-4 h-4 text-[#0F4C81]" />
               Filters
@@ -243,6 +463,7 @@ function HostelsContent() {
             {/* View Mode (Grid vs List) */}
             <div className="hidden sm:flex items-center bg-gray-200/70 p-1 rounded-xl">
               <button
+                type="button"
                 onClick={() => setViewMode("grid")}
                 title="Grid View"
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
@@ -252,6 +473,7 @@ function HostelsContent() {
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode("list")}
                 title="List View"
                 className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
@@ -264,6 +486,38 @@ function HostelsContent() {
           </div>
         </div>
 
+        {/* Applied Filters Chip Row */}
+        {appliedChips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 mb-6 p-3 bg-white rounded-2xl border border-gray-100 shadow-xs animate-fade-up">
+            <span className="text-xs font-semibold text-gray-500 mr-1 flex items-center gap-1.5">
+              <span>Applied Filters ({appliedChips.length}):</span>
+            </span>
+            {appliedChips.map((chip) => (
+              <span
+                key={chip.id}
+                className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#0F4C81]/8 border border-[#0F4C81]/15 text-[#0F4C81] text-xs font-semibold rounded-full transition-all"
+              >
+                <span>{chip.label}</span>
+                <button
+                  type="button"
+                  onClick={chip.onRemove}
+                  className="hover:bg-[#0F4C81]/20 rounded-full p-0.5 transition-colors cursor-pointer"
+                  aria-label={`Remove filter ${chip.label}`}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </span>
+            ))}
+            <button
+              type="button"
+              onClick={resetFilters}
+              className="text-xs text-[#FF6B35] hover:text-[#e85a22] font-semibold ml-auto px-2 py-1 cursor-pointer transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+        )}
+
         {/* Content Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
           {/* Desktop Filter Sidebar (1 col) */}
@@ -272,6 +526,7 @@ function HostelsContent() {
               filters={filters}
               onChange={updateFilter}
               onReset={resetFilters}
+              counts={filterCounts}
             />
           </div>
 
@@ -300,9 +555,10 @@ function HostelsContent() {
                   No accommodations match your criteria
                 </h3>
                 <p className="text-gray-500 text-xs sm:text-sm max-w-sm mx-auto mb-6">
-                  Try adjusting your budget, selecting another city, or relaxing your filter constraints.
+                  Try adjusting your budget, selecting another accommodation type, or clearing some filters.
                 </p>
                 <button
+                  type="button"
                   onClick={resetFilters}
                   className="px-5 py-2.5 bg-[#0F4C81] text-white text-xs sm:text-sm font-semibold rounded-xl hover:bg-[#0d3f6e] transition-colors cursor-pointer"
                 >
@@ -314,37 +570,71 @@ function HostelsContent() {
         </div>
       </div>
 
-      {/* Mobile Filters Modal Drawer */}
+      {/* Mobile Filters Bottom Sheet Modal Drawer */}
       {mobileFilterOpen && (
         <div className="fixed inset-0 z-50 flex lg:hidden">
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-xs"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileFilterOpen(false)}
           />
-          <div className="relative ml-auto w-full max-w-xs sm:max-w-sm bg-white h-full overflow-y-auto p-5 shadow-2xl flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between pb-4 border-b border-gray-100 mb-4">
-                <span className="font-display font-bold text-base text-gray-900">Filter Options</span>
-                <button
-                  onClick={() => setMobileFilterOpen(false)}
-                  className="p-1.5 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-100 cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+          <div className="relative mt-auto w-full bg-white max-h-[88vh] rounded-t-3xl overflow-hidden shadow-2xl flex flex-col z-10 animate-slide-up">
+            {/* Drawer Pull Bar & Header */}
+            <div className="pt-3 pb-3 px-5 border-b border-gray-100 flex-shrink-0 bg-white">
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-3" />
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-display font-bold text-base text-gray-900">
+                    Filters
+                  </span>
+                  {activeFilterCount > 0 && (
+                    <span className="px-2 py-0.5 bg-[#0F4C81] text-white text-[10px] rounded-full font-bold">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  {appliedChips.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={resetFilters}
+                      className="text-xs text-[#FF6B35] font-semibold hover:underline cursor-pointer"
+                    >
+                      Reset All
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setMobileFilterOpen(false)}
+                    className="p-1.5 text-gray-400 hover:text-gray-700 rounded-xl hover:bg-gray-100 cursor-pointer"
+                    aria-label="Close filters"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
+            </div>
+
+            {/* Scrollable Sidebar Content */}
+            <div className="overflow-y-auto p-5 flex-1 bg-white">
               <FilterSidebar
                 filters={filters}
                 onChange={updateFilter}
                 onReset={resetFilters}
+                counts={filterCounts}
                 className="shadow-none border-0 p-0"
               />
             </div>
-            <div className="pt-4 mt-6 border-t border-gray-100">
+
+            {/* Sticky Bottom Apply Button */}
+            <div className="p-4 border-t border-gray-100 bg-white/95 backdrop-blur-sm flex-shrink-0">
               <button
+                type="button"
                 onClick={() => setMobileFilterOpen(false)}
-                className="w-full py-3 bg-[#0F4C81] text-white font-bold rounded-xl text-sm cursor-pointer shadow-md"
+                className="w-full py-3.5 bg-[#0F4C81] hover:bg-[#0d3f6e] text-white font-bold rounded-xl text-sm cursor-pointer shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2"
               >
-                Show {filteredListings.length} Results
+                <span>Apply Filters</span>
+                <span className="w-1 h-1 rounded-full bg-white/60" />
+                <span>Show {filteredListings.length} {filteredListings.length === 1 ? "Result" : "Results"}</span>
               </button>
             </div>
           </div>

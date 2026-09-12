@@ -15,9 +15,12 @@ import {
   LogIn,
   User as UserIcon,
   LayoutDashboard,
+  Phone,
+  Mail,
 } from "lucide-react";
 import { useAuth } from "@/lib/context/AuthContext";
 import Logo from "@/components/ui/Logo";
+import { SITE_CONTACT } from "@/lib/constants";
 
 const navLinks = [
   { href: "/", label: "Home", icon: Home },
@@ -92,6 +95,15 @@ export default function Navbar() {
 
           {/* Auth Section (Desktop) */}
           <div className="hidden md:flex items-center gap-2 lg:gap-3">
+            <a
+              href={SITE_CONTACT.phoneHref}
+              title={`Call Student Support: ${SITE_CONTACT.phoneDisplay}`}
+              className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-600 hover:text-[#0F4C81] hover:bg-gray-100 transition-colors mr-1"
+            >
+              <Phone className="w-3.5 h-3.5 text-[#FF6B35]" />
+              <span>{SITE_CONTACT.phoneDisplay}</span>
+            </a>
+
             {isAuthenticated && user ? (
               <div className="relative flex items-center gap-2">
                 <Link
@@ -253,6 +265,27 @@ export default function Navbar() {
                   </Link>
                 </>
               )}
+            </div>
+
+            {/* Mobile Contact Support */}
+            <div className="pt-4 mt-2 border-t border-gray-100 flex flex-col gap-2">
+              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Direct Support</span>
+              <div className="grid grid-cols-1 gap-2">
+                <a
+                  href={SITE_CONTACT.phoneHref}
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-xs font-semibold text-gray-700 hover:text-[#0F4C81] transition-colors min-h-[44px]"
+                >
+                  <Phone className="w-4 h-4 text-[#FF6B35] shrink-0" />
+                  <span>{SITE_CONTACT.phoneDisplay}</span>
+                </a>
+                <a
+                  href={SITE_CONTACT.emailHref}
+                  className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-xs font-semibold text-gray-700 hover:text-[#0F4C81] transition-colors min-h-[44px]"
+                >
+                  <Mail className="w-4 h-4 text-[#FF6B35] shrink-0" />
+                  <span className="truncate">{SITE_CONTACT.email}</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

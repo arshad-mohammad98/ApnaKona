@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, CheckCircle, Clock, FileText, Send, MessageSquareWarning } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, FileText, Send, MessageSquareWarning, Phone, Mail, Headphones } from "lucide-react";
 import { DUMMY_COMPLAINTS } from "@/lib/data/complaints";
 import { DUMMY_LISTINGS } from "@/lib/data/listings";
 import { Complaint } from "@/lib/types";
+import { SITE_CONTACT } from "@/lib/constants";
 
 const STATUS_COLORS: Record<Complaint["status"], string> = {
   Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -66,6 +67,38 @@ export default function GrievancePage() {
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Reach Us Directly Banner */}
+        <div className="bg-white rounded-3xl p-5 sm:p-6 shadow-card border border-gray-100 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF6B35]/10 text-[#FF6B35] text-xs font-bold">
+              <Headphones className="w-3.5 h-3.5" />
+              Direct Support Channels
+            </div>
+            <h2 className="font-display font-bold text-base sm:text-lg text-gray-900">
+              Need immediate help outside formal grievance?
+            </h2>
+            <p className="text-gray-500 text-xs sm:text-sm max-w-lg">
+              For urgent safety concerns, payment disputes, or quick inquiries, reach our student support desk directly:
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+            <a
+              href={SITE_CONTACT.phoneHref}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#0F4C81] hover:bg-[#0d3f6e] text-white text-xs sm:text-sm font-semibold transition-all shadow-xs min-h-[44px]"
+            >
+              <Phone className="w-4 h-4 text-white" />
+              <span>{SITE_CONTACT.phoneDisplay}</span>
+            </a>
+            <a
+              href={SITE_CONTACT.emailHref}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 hover:text-[#0F4C81] text-xs sm:text-sm font-semibold transition-all min-h-[44px]"
+            >
+              <Mail className="w-4 h-4 text-[#FF6B35]" />
+              <span>{SITE_CONTACT.email}</span>
+            </a>
+          </div>
+        </div>
+
         {/* Responsive Tabs */}
         <div className="flex gap-1.5 bg-white rounded-2xl p-1.5 shadow-card border border-gray-100 mb-8 overflow-x-auto">
           {[
