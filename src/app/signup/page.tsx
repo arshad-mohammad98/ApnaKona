@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, GraduationCap, Building2, Mail, Lock, Phone, User, ArrowRight } from "lucide-react";
 import { useAuth } from "@/lib/context/AuthContext";
 import Logo from "@/components/ui/Logo";
+import { generateOtp, sendOtpEmail } from "@/lib/emailjs";
+import OtpVerificationModal from "@/components/auth/OtpVerificationModal";
 
 function SignupContent() {
   const searchParams = useSearchParams();
@@ -26,13 +28,84 @@ function SignupContent() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // OTP Verification States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [activeOtp, setActiveOtp] = useState<string>("");
+  const [otpExpiresAt, setOtpExpiresAt] = useState<number>(0);
+  const [otpDemoNotice, setOtpDemoNotice] = useState<string | null>(null);
+
   const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
+  // Step 1: User fills out form and clicks Sign Up -> Generate OTP & Send Email
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setErrorMsg(null);
 
+    // Basic input validations
+    if (!form.name.trim()) {
+      setErrorMsg("Please enter your full name.");
+      return;
+    }
+    if (!form.email.trim() || !form.email.includes("@")) {
+      setErrorMsg("Please enter a valid email address.");
+      return;
+    }
+    if (!form.password || form.password.length < 6) {
+      setErrorMsg("Password must be at least 6 characters.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // 1. Generate random 6-digit OTP
+      const otp = generateOtp();
+      const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes validity
+
+      setActiveOtp(otp);
+      setOtpExpiresAt(expiresAt);
+
+      // 2. Send OTP via EmailJS
+      const emailResult = await sendOtpEmail({
+        to_email: form.email,
+        user_name: form.name,
+        otp_code: otp,
+      });
+
+      if (!emailResult.success) {
+        setErrorMsg(emailResult.message || "Failed to send verification code. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      if (emailResult.isMock) {
+        setOtpDemoNotice(emailResult.message || null);
+      } else {
+        setOtpDemoNotice(null);
+      }
+
+      // 3. Open verification modal
+      setShowOtpModal(true);
+    } catch (err: unknown) {
+      console.error("Failed to initiate OTP verification:", err);
+      setErrorMsg("Could not send verification email. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Step 2: User submits the 6-digit OTP in the modal
+  const handleVerifyOtp = async (enteredOtp: string): Promise<boolean> => {
+    // Validate OTP and expiration
+    if (Date.now() > otpExpiresAt) {
+      return false;
+    }
+
+    if (enteredOtp !== activeOtp) {
+      return false;
+    }
+
+    // OTP is valid! Proceed to create the account in Supabase
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -52,8 +125,7 @@ function SignupContent() {
       const data = await res.json();
       if (!res.ok && data.error) {
         setErrorMsg(data.error);
-        setLoading(false);
-        return;
+        return false;
       }
 
       login(
@@ -69,13 +141,40 @@ function SignupContent() {
         }
       );
 
+      setShowOtpModal(false);
       router.push(role === "owner" ? "/dashboard/owner" : "/dashboard/student");
+      return true;
     } catch (err: unknown) {
-      console.error("Signup failed:", err);
-      setErrorMsg("Failed to connect to database. Please try again.");
-    } finally {
-      setLoading(false);
+      console.error("Account creation failed after OTP verification:", err);
+      return false;
     }
+  };
+
+  // Resend OTP handler
+  const handleResendOtp = async () => {
+    const newOtp = generateOtp();
+    const newExpiresAt = Date.now() + 5 * 60 * 1000;
+
+    setActiveOtp(newOtp);
+    setOtpExpiresAt(newExpiresAt);
+
+    const emailResult = await sendOtpEmail({
+      to_email: form.email,
+      user_name: form.name,
+      otp_code: newOtp,
+    });
+
+    if (emailResult.isMock) {
+      setOtpDemoNotice(emailResult.message || null);
+    } else {
+      setOtpDemoNotice(null);
+    }
+
+    return {
+      success: emailResult.success,
+      newExpiresAt,
+      demoNotice: emailResult.message || null,
+    };
   };
 
   return (
@@ -262,6 +361,18 @@ function SignupContent() {
           </p>
         </div>
       </div>
+
+      {/* Email OTP Verification Modal */}
+      <OtpVerificationModal
+        isOpen={showOtpModal}
+        email={form.email}
+        userName={form.name}
+        expiresAt={otpExpiresAt}
+        demoNotice={otpDemoNotice}
+        onVerify={handleVerifyOtp}
+        onResend={handleResendOtp}
+        onClose={() => setShowOtpModal(false)}
+      />
     </div>
   );
 }
