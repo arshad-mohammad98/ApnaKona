@@ -1,7 +1,6 @@
 "use client";
 
-import { useId } from "react";
-import { RotateCcw, Calendar, Check, Info } from "lucide-react";
+import { RotateCcw, Check, Info } from "lucide-react";
 
 export interface FilterState {
   city: string;
@@ -12,7 +11,6 @@ export interface FilterState {
   minPrice: number;
   maxPrice: number;
   acTypes: string[];
-  moveInDate: string;
   messIncluded: boolean;
   tiffinService: boolean;
   noCurfew: boolean;
@@ -32,7 +30,6 @@ export const INITIAL_FILTERS: FilterState = {
   minPrice: 3000,
   maxPrice: 30000,
   acTypes: [],
-  moveInDate: "",
   messIncluded: false,
   tiffinService: false,
   noCurfew: false,
@@ -93,7 +90,6 @@ export default function FilterSidebar({
   counts,
   className = "",
 }: FilterSidebarProps) {
-  const moveInInputId = useId();
   const isFiltered =
     Boolean(filters.city && filters.city !== "All") ||
     filters.roomTypes.length > 0 ||
@@ -103,7 +99,6 @@ export default function FilterSidebar({
     filters.minPrice > 3000 ||
     filters.maxPrice < 30000 ||
     filters.acTypes.length > 0 ||
-    Boolean(filters.moveInDate) ||
     filters.messIncluded ||
     filters.tiffinService ||
     filters.noCurfew ||
@@ -362,35 +357,7 @@ export default function FilterSidebar({
         </div>
       </div>
 
-      {/* 5. Move-in Date Picker */}
-      <div className="pt-2 border-t border-gray-100">
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor={moveInInputId} className="text-xs font-bold text-gray-500 uppercase tracking-wider cursor-pointer">
-            Move-in Date
-          </label>
-          {filters.moveInDate && (
-            <button
-              type="button"
-              onClick={() => onChange("moveInDate", "")}
-              className="text-[11px] text-[#FF6B35] hover:underline cursor-pointer"
-            >
-              Clear date
-            </button>
-          )}
-        </div>
-        <div className="relative">
-          <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          <input
-            id={moveInInputId}
-            type="date"
-            value={filters.moveInDate}
-            onChange={(e) => onChange("moveInDate", e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs font-medium border border-gray-200 rounded-xl outline-none focus:border-[#0F4C81] focus:ring-1 focus:ring-[#0F4C81] bg-white cursor-pointer"
-          />
-        </div>
-      </div>
-
-      {/* 6. Furnishing */}
+      {/* 5. Furnishing */}
       <div className="pt-2 border-t border-gray-100">
         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
           Furnishing

@@ -24,25 +24,58 @@ function SignupContent() {
   });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const update = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
-    login({
-      id: `new-${Date.now()}`,
-      name: form.name,
-      email: form.email,
-      phone: form.phone,
-      role,
-      college: form.college || undefined,
-      preferredCity: form.preferredCity || undefined,
-      businessName: form.businessName || undefined,
-    });
-    router.push(role === "owner" ? "/dashboard/owner" : "/dashboard/student");
-    setLoading(false);
+    setErrorMsg(null);
+
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          password: form.password,
+          role,
+          college: form.college || undefined,
+          preferredCity: form.preferredCity || undefined,
+          businessName: form.businessName || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok && data.error) {
+        setErrorMsg(data.error);
+        setLoading(false);
+        return;
+      }
+
+      login(
+        data.user || {
+          id: `new-${Date.now()}`,
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          role,
+          college: form.college || undefined,
+          preferredCity: form.preferredCity || undefined,
+          businessName: form.businessName || undefined,
+        }
+      );
+
+      router.push(role === "owner" ? "/dashboard/owner" : "/dashboard/student");
+    } catch (err: unknown) {
+      console.error("Signup failed:", err);
+      setErrorMsg("Failed to connect to database. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -197,6 +230,12 @@ function SignupContent() {
                 </button>
               </div>
             </div>
+
+            {errorMsg && (
+              <div className="p-3 text-xs bg-red-50 text-red-600 rounded-xl border border-red-100">
+                {errorMsg}
+              </div>
+            )}
 
             <button
               id="signup-submit-btn"

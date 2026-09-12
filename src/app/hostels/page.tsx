@@ -14,6 +14,7 @@ import {
   List as ListIcon,
 } from "lucide-react";
 import ListingCard from "@/components/hostels/ListingCard";
+import SearchWithSuggestions from "@/components/hostels/SearchWithSuggestions";
 import FilterSidebar, {
   FilterState,
   INITIAL_FILTERS,
@@ -193,13 +194,7 @@ function HostelsContent() {
         if (filters.acTypes[0] === "Non-AC" && l.isAC) return false;
       }
 
-      // 9. Move-in Date
-      if (filters.moveInDate) {
-        if (!l.available) return false;
-        if (l.postedAt && l.postedAt > filters.moveInDate) return false;
-      }
-
-      // 10. Meals & Policies
+      // 9. Meals & Policies
       if (filters.messIncluded && !l.hasMess) return false;
       if (filters.tiffinService && !l.hasTiffin) return false;
       if (filters.noCurfew && l.hasCurfew) return false;
@@ -280,13 +275,6 @@ function HostelsContent() {
       });
     });
 
-    if (filters.moveInDate) {
-      chips.push({
-        id: "moveInDate",
-        label: `Move-in: ${filters.moveInDate}`,
-        onRemove: () => updateFilter("moveInDate", ""),
-      });
-    }
 
     filters.furnishingStatuses.forEach((f) => {
       chips.push({
@@ -370,25 +358,26 @@ function HostelsContent() {
               Browse thousands of verified student accommodations with zero brokerage fees.
             </p>
 
-            {/* Search Box */}
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by city, college, or locality (e.g. Christ University, Koramangala, Powai)..."
-                className="w-full pl-12 pr-10 py-3.5 bg-white text-gray-900 rounded-2xl shadow-lg text-sm sm:text-base outline-none focus:ring-2 focus:ring-[#FF6B35]"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
+            {/* Search Box with Auto-Suggestions */}
+            <SearchWithSuggestions
+              value={searchTerm}
+              onChange={(val) => setSearchTerm(val)}
+              onSelectSuggestion={(item) => {
+                setSearchTerm(item.value);
+                if (item.category === "Cities") {
+                  updateFilter("city", item.value);
+                } else if (
+                  item.city &&
+                  filters.city &&
+                  filters.city !== "All" &&
+                  filters.city.toLowerCase() !== item.city.toLowerCase()
+                ) {
+                  // If current city filter conflicts with the selected item's city, align it
+                  updateFilter("city", item.city);
+                }
+              }}
+              placeholder="Search by city, college, or locality (e.g. Christ University, Koramangala, Powai)..."
+            />
 
             {/* Popular City Filter Chips */}
             <div className="flex flex-wrap items-center gap-1.5 mt-4 text-xs">
