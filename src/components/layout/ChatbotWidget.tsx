@@ -7,8 +7,6 @@ import {
   Bot,
   Sparkles,
   RotateCcw,
-  Sun,
-  Moon,
   ShieldCheck,
   Building,
   DollarSign,
@@ -50,7 +48,7 @@ const QUICK_REPLIES = [
 const FALLBACK_KNOWLEDGE: Record<string, string> = {
   "How can I find a PG near my college?":
     "Here is how to quickly find a PG near your campus:\n\n" +
-    "1. Go to the **[Find PG / Hostel](/search)** tab in the top navigation.\n" +
+    "1. Go to the **[Hostel/PG](/hostels)** tab in the top navigation.\n" +
     "2. Enter your **college or locality name** in the search bar.\n" +
     "3. Set your preferred distance filter and room sharing (Single, Double, or Triple).\n" +
     "4. Look for listings with the **Verified** badge 🛡️ for zero-brokerage and inspected amenities.\n\n" +
@@ -58,34 +56,35 @@ const FALLBACK_KNOWLEDGE: Record<string, string> = {
 
   "How does property and owner verification work on ApnaKona?":
     "Student safety is our top priority! Here is our 3-step verification system:\n\n" +
-    "- 🛡️ **Physical Inspection**: Our field team verifies premises for CCTV, safety, fire exits, and cleanliness.\n" +
-    "- 📄 **Owner KYC**: We verify government ID and property ownership records before awarding the badge.\n" +
-    "- ⚡ **Amenity Testing**: High-speed Wi-Fi, drinking water, and power backup are validated on-site.\n\n" +
-    "Verified rooms carry the green shield icon so you can book with confidence.",
+    "- **Physical Inspection**: Our field scouts visit each property to confirm photos, cleanliness, and safety equipment.\n" +
+    "- **Government ID & Property Deed Check**: Owner identities and property ownership documents are cross-checked.\n" +
+    "- **Student Community Reviews**: Only students with verified stay records can post ratings and reviews.\n\n" +
+    "Verified listings carry the green **Verified Owner** seal.",
 
   "What is a realistic budget range for student PGs and hostels?":
-    "Here is a typical student budget guide across Indian cities:\n\n" +
-    "- **Metro Cities (Bengaluru, Delhi NCR, Mumbai, Pune)**:\n" +
-    "  - *Triple/Quad Sharing*: ₹6,500 – ₹9,500/mo (with meals + Wi-Fi)\n" +
-    "  - *Double Sharing*: ₹9,500 – ₹15,000/mo\n" +
-    "  - *Private Single Room*: ₹15,000 – ₹24,000/mo\n" +
-    "- **Tier 2 Cities (Jaipur, Indore, Lucknow, Chandigarh)**:\n" +
-    "  - *Shared*: ₹4,500 – ₹8,000/mo\n" +
-    "  - *Single*: ₹8,500 – ₹13,000/mo\n\n" +
-    "💡 *Pro-tip: Always check if meals, electricity units, and security deposits are included.*",
+    "Average student living costs across popular educational hubs in India:\n\n" +
+    "- **Bangalore (Koramangala, HSR, Mathikere)**: ₹7,500 – ₹16,000/mo\n" +
+    "- **Pune (Viman Nagar, Kothrud, Hinjawadi)**: ₹6,500 – ₹14,000/mo\n" +
+    "- **Delhi NCR (North Campus, South Campus, Noida)**: ₹6,000 – ₹15,000/mo\n" +
+    "- **Mumbai (Powai, Vile Parle, Navi Mumbai)**: ₹9,000 – ₹22,000/mo\n\n" +
+    "Most double-sharing rooms with 3 meals included start around **₹8,500/month**.",
 
   "How do I list my property on ApnaKona as an owner?":
-    "Listing your PG, hostel, or flat on ApnaKona is 100% free with zero commission:\n\n" +
-    "1. Click **Sign Up** and select the **Owner** role.\n" +
-    "2. Open your Owner Dashboard and click **+ Add Listing**.\n" +
-    "3. Add clear photos, room types, house rules, and monthly rent.\n" +
-    "4. Request an inspection visit to earn the **Verified Partner** badge and get up to 3x more student leads!\n\n" +
-    "Need help getting started? Visit our [Property Listing Guide](/role-select).",
+    "Listing your property on ApnaKona is completely free and takes under 3 minutes:\n\n" +
+    "1. Click **[Sign Up Free](/signup?role=owner)** and choose 'Property Owner'.\n" +
+    "2. Open your **Owner Dashboard** and click '+ Add New Listing'.\n" +
+    "3. Fill in room details, upload at least 3 high-quality photos, and submit.\n" +
+    "4. Our team approves verified submissions within **24 hours**.",
 };
 
 const DEFAULT_GREETING =
-  "Hi! I'm **Roomie** 👋 Your personal ApnaKona housing guide.\n\n" +
-  "I can help you discover verified PGs near your campus, break down realistic rents, check safety features, or guide you through listing a property. What are you looking for?";
+  "Hi! I'm **Roomie**, your ApnaKona student housing guide 🎓\n\n" +
+  "I can help you:\n" +
+  "- 🔍 Discover verified PGs, hostels & flats near your college\n" +
+  "- 💰 Estimate realistic budget & rent ranges\n" +
+  "- 🚇 Check metro connectivity & campus commute times\n" +
+  "- 🤝 Connect with compatible student flatmates\n\n" +
+  "What college or city are you searching in?";
 
 function getFormattedTime() {
   return new Date().toLocaleTimeString("en-IN", {
@@ -110,21 +109,12 @@ export default function ChatbotWidget() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize saved theme and messages safely after mount
+  // Initialize saved messages safely after mount
   useEffect(() => {
     try {
-      const savedTheme = localStorage.getItem("apnakona_chatbot_theme");
-      const prefersDark =
-        window.matchMedia &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches;
-      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
-        setTimeout(() => setIsDark(true), 0);
-      }
-
       const saved =
         localStorage.getItem("roomie_chat_history") ||
         localStorage.getItem("kona_chat_history");
@@ -169,16 +159,6 @@ export default function ChatbotWidget() {
       document.body.style.overflow = "unset";
     };
   }, [open]);
-
-  const toggleTheme = () => {
-    const nextTheme = !isDark;
-    setIsDark(nextTheme);
-    try {
-      localStorage.setItem("apnakona_chatbot_theme", nextTheme ? "dark" : "light");
-    } catch {
-      // Storage unavailable
-    }
-  };
 
   const clearChat = () => {
     const freshGreeting: Message = {
@@ -237,7 +217,7 @@ export default function ChatbotWidget() {
       if (data.error || !data.reply) {
         const fallback =
           FALLBACK_KNOWLEDGE[cleanText] ||
-          "I'm here to help with all ApnaKona questions! You can search verified student PGs and hostels directly on our [Search Page](/search), check safe local neighborhoods on our [Explore Map](/explore), or post room requirements on [Connect](/connect).";
+          "I'm here to help with all ApnaKona questions! You can search verified student PGs and hostels directly on our [Hostel/PG](/hostels), check safe local neighborhoods on our [Explore Map](/explore), or post room requirements on [Connect](/connect).";
         setMessages((prev) => [
           ...prev,
           {
@@ -261,7 +241,7 @@ export default function ChatbotWidget() {
     } catch {
       const fallback =
         FALLBACK_KNOWLEDGE[cleanText] ||
-        "I'm currently assisting in offline mode! You can browse 100% verified student accommodations on our [Search](/search) page, or check student safety guidelines in our [Grievance & Support](/grievance) center. Feel free to ask another question!";
+        "I'm currently unable to connect to the cloud AI service, but you can explore verified student housing directly on our **[Hostel/PG](/hostels)** page or raise inquiries through your student dashboard.";
       setMessages((prev) => [
         ...prev,
         {
@@ -279,23 +259,24 @@ export default function ChatbotWidget() {
   const isInitialState = messages.length <= 1;
 
   return (
-    <div className={isDark ? "dark" : ""}>
-      {/* Floating Circular Launcher Button */}
-      <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40">
+    <div>
+      {/* Floating Launcher Button */}
+      <div className="fixed bottom-5 right-5 z-40">
         {!open && (
           <div className="relative group">
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#0F4C81] via-[#1a6db5] to-[#FF6B35] opacity-70 blur-sm animate-pulse-glow" />
+            {/* Subtle Pulse Glow */}
+            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#0F4C81] to-[#FF6B35] opacity-50 blur-sm group-hover:opacity-100 transition-opacity duration-300" />
 
             <button
               id="chatbot-launcher"
               onClick={() => setOpen(true)}
               aria-label="Chat with Roomie AI"
-              className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br from-[#0F4C81] via-[#155a96] to-[#FF6B35] text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer focus:outline-none focus:ring-4 focus:ring-[#0F4C81]/30"
+              className="relative flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-tr from-[#0F4C81] to-[#1a6db5] text-white shadow-xl hover:shadow-2xl transition-all duration-300 transform group-hover:scale-105 active:scale-95 cursor-pointer"
             >
               <div className="relative flex items-center justify-center">
-                <Bot className="w-7 h-7 sm:w-8 sm:h-8 transition-transform group-hover:scale-110" />
+                <Bot className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
                 <Sparkles
-                  className="w-3.5 h-3.5 text-yellow-300 absolute -top-1 -right-1 animate-spin"
+                  className="w-3.5 h-3.5 text-[#FF6B35] absolute -top-1 -right-1 animate-spin"
                   style={{ animationDuration: "6s" }}
                 />
               </div>
@@ -303,7 +284,7 @@ export default function ChatbotWidget() {
               {/* Online Green Pulsing Indicator */}
               <span className="absolute top-0 right-0 flex h-4 w-4">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white dark:border-gray-900" />
+                <span className="relative inline-flex rounded-full h-4 w-4 bg-green-500 border-2 border-white" />
               </span>
             </button>
 
@@ -331,9 +312,9 @@ export default function ChatbotWidget() {
         /* Tablet & Desktop: Wide panel */
         md:inset-auto md:bottom-6 md:right-6 md:w-[460px] md:h-[640px] md:max-h-[88vh] md:rounded-3xl
         flex flex-col overflow-hidden shadow-2xl
-        border border-gray-200/80 dark:border-gray-800/80
-        bg-white dark:bg-[#151726] text-gray-900 dark:text-gray-100
-        backdrop-blur-xl ring-1 ring-black/5 dark:ring-white/10
+        border border-gray-200/80
+        bg-white text-gray-900
+        backdrop-blur-xl ring-1 ring-black/5
         `}
       >
         {/* Header */}
@@ -362,14 +343,6 @@ export default function ChatbotWidget() {
           {/* Header Controls */}
           <div className="flex items-center gap-1.5">
             <button
-              onClick={toggleTheme}
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              aria-label="Toggle chatbot theme"
-              className="p-2 rounded-xl text-white/80 hover:text-white hover:bg-white/15 transition-colors cursor-pointer min-h-[40px] min-w-[40px] flex items-center justify-center"
-            >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-            <button
               onClick={clearChat}
               title="Reset conversation"
               aria-label="Reset conversation"
@@ -388,7 +361,7 @@ export default function ChatbotWidget() {
         </div>
 
         {/* Message Stream */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50 dark:bg-[#10121f]/50">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
           {messages.map((m) => {
             const isUser = m.role === "user";
             return (
@@ -399,16 +372,16 @@ export default function ChatbotWidget() {
                 }`}
               >
                 {!isUser && (
-                  <div className="w-8 h-8 rounded-xl bg-[#0F4C81]/10 dark:bg-[#0F4C81]/30 border border-[#0F4C81]/20 flex items-center justify-center text-[#0F4C81] dark:text-[#5c93e2] shrink-0 mt-0.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#0F4C81]/10 border border-[#0F4C81]/20 flex items-center justify-center text-[#0F4C81] shrink-0 mt-0.5">
                     <Bot className="w-4 h-4" />
                   </div>
                 )}
                 <div className="space-y-1">
                   <div
-                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                    className={`rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-xs ${
                       isUser
                         ? "bg-[#0F4C81] text-white rounded-br-xs font-medium"
-                        : "bg-white dark:bg-[#1a1d2e] text-gray-800 dark:text-gray-100 rounded-bl-xs border border-gray-100 dark:border-gray-800"
+                        : "bg-white text-gray-800 rounded-bl-xs border border-gray-100"
                     }`}
                   >
                     <ReactMarkdown
@@ -421,7 +394,7 @@ export default function ChatbotWidget() {
                         a: ({ href, children }) => (
                           <a
                             href={href}
-                            className="inline-flex items-center gap-0.5 text-[#FF6B35] dark:text-[#ff8558] hover:underline font-semibold"
+                            className="inline-flex items-center gap-0.5 text-[#FF6B35] hover:underline font-semibold"
                             target={href?.startsWith("http") ? "_blank" : undefined}
                             rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
                           >
@@ -435,7 +408,7 @@ export default function ChatbotWidget() {
                     </ReactMarkdown>
                   </div>
                   <p
-                    className={`text-[10px] text-gray-400 dark:text-gray-500 px-1 ${
+                    className={`text-[10px] text-gray-400 px-1 ${
                       isUser ? "text-right" : "text-left"
                     }`}
                   >
@@ -449,10 +422,10 @@ export default function ChatbotWidget() {
           {/* Typing indicator */}
           {loading && (
             <div className="flex gap-2.5 max-w-[80%] animate-message-in">
-              <div className="w-8 h-8 rounded-xl bg-[#0F4C81]/10 dark:bg-[#0F4C81]/30 flex items-center justify-center text-[#0F4C81] shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-[#0F4C81]/10 flex items-center justify-center text-[#0F4C81] shrink-0">
                 <Bot className="w-4 h-4" />
               </div>
-              <div className="bg-white dark:bg-[#1a1d2e] rounded-2xl rounded-bl-xs px-4 py-3 border border-gray-100 dark:border-gray-800 shadow-sm flex items-center gap-1.5">
+              <div className="bg-white rounded-2xl rounded-bl-xs px-4 py-3 border border-gray-100 shadow-xs flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-[#0F4C81] animate-bounce" style={{ animationDelay: "0ms" }} />
                 <div className="w-2 h-2 rounded-full bg-[#0F4C81] animate-bounce" style={{ animationDelay: "150ms" }} />
                 <div className="w-2 h-2 rounded-full bg-[#0F4C81] animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -465,8 +438,8 @@ export default function ChatbotWidget() {
 
         {/* Quick Replies Panel */}
         {isInitialState && (
-          <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800/60 bg-white/80 dark:bg-[#151726]/80 shrink-0">
-            <p className="text-[11px] font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+          <div className="px-4 py-2 border-t border-gray-100 bg-white/90 shrink-0">
+            <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
               Common Questions
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -474,9 +447,9 @@ export default function ChatbotWidget() {
                 <button
                   key={label}
                   onClick={() => sendMessage(prompt)}
-                  className="flex items-center gap-2 p-2.5 text-xs text-left text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#1c2033] hover:bg-[#0F4C81]/10 dark:hover:bg-[#0F4C81]/20 hover:text-[#0F4C81] dark:hover:text-[#5c93e2] rounded-xl border border-gray-200/60 dark:border-gray-700/60 transition-colors cursor-pointer min-h-[44px]"
+                  className="flex items-center gap-2 p-2.5 text-xs text-left text-gray-700 bg-gray-50 hover:bg-[#0F4C81]/10 hover:text-[#0F4C81] rounded-xl border border-gray-200/60 transition-colors cursor-pointer min-h-[44px]"
                 >
-                  <Icon className="w-3.5 h-3.5 text-[#0F4C81] dark:text-[#5c93e2] shrink-0" />
+                  <Icon className="w-3.5 h-3.5 text-[#0F4C81] shrink-0" />
                   <span className="truncate">{label}</span>
                 </button>
               ))}
@@ -485,7 +458,7 @@ export default function ChatbotWidget() {
         )}
 
         {/* Chat Input Bar */}
-        <div className="p-3 sm:p-4 bg-white dark:bg-[#151726] border-t border-gray-200 dark:border-gray-800 shrink-0">
+        <div className="p-3 sm:p-4 bg-white border-t border-gray-200 shrink-0">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -500,7 +473,7 @@ export default function ChatbotWidget() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask Roomie about PGs, rent, rules..."
               disabled={loading}
-              className="flex-1 px-4 py-3 text-sm rounded-xl bg-gray-50 dark:bg-[#1c2033] border border-gray-200 dark:border-gray-700/80 text-gray-900 dark:text-white placeholder-gray-400 outline-none focus:border-[#0F4C81] dark:focus:border-[#5c93e2] focus:ring-2 focus:ring-[#0F4C81]/10 transition-all min-h-[44px]"
+              className="flex-1 px-4 py-3 text-sm rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/10 transition-all min-h-[44px]"
             />
             <button
               type="submit"
@@ -511,7 +484,7 @@ export default function ChatbotWidget() {
               <Send className="w-4 h-4" />
             </button>
           </form>
-          <div className="flex items-center justify-between mt-2 px-1 text-[10px] text-gray-400 dark:text-gray-500">
+          <div className="flex items-center justify-between mt-2 px-1 text-[10px] text-gray-400">
             <span>Powered by ApnaKona AI</span>
             <span>Zero Brokerage • Verified</span>
           </div>
