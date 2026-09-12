@@ -1,6 +1,7 @@
 "use client";
 
 import { RotateCcw, Check, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export interface FilterState {
   city: string;
@@ -90,6 +91,7 @@ export default function FilterSidebar({
   counts,
   className = "",
 }: FilterSidebarProps) {
+  const { t } = useTranslation();
   const isFiltered =
     Boolean(filters.city && filters.city !== "All") ||
     filters.roomTypes.length > 0 ||
@@ -127,7 +129,7 @@ export default function FilterSidebar({
       {/* Header / Clear All */}
       <div className="flex items-center justify-between pb-3.5 border-b border-gray-100">
         <div className="flex items-center gap-2">
-          <span className="font-display font-bold text-sm text-gray-900">Filters</span>
+          <span className="font-display font-bold text-sm text-gray-900">{t("filters.title", "Filters")}</span>
           {isFiltered && (
             <span className="w-2 h-2 rounded-full bg-[#FF6B35] animate-pulse" />
           )}
@@ -139,7 +141,7 @@ export default function FilterSidebar({
             className="flex items-center gap-1.5 text-xs text-[#FF6B35] hover:text-[#e85a22] font-semibold cursor-pointer transition-colors"
           >
             <RotateCcw className="w-3.5 h-3.5" />
-            Clear All
+            {t("filters.clearAll", "Clear All")}
           </button>
         )}
       </div>
@@ -148,7 +150,7 @@ export default function FilterSidebar({
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-            Accommodation Type
+            {t("filters.roomType", "Accommodation Type")}
           </p>
           {filters.roomTypes.length > 0 && (
             <span className="text-[10px] text-[#0F4C81] font-semibold">
@@ -194,7 +196,7 @@ export default function FilterSidebar({
       <div>
         <div className="flex items-center justify-between mb-2.5">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-            Sharing Type
+            {t("filters.sharingType", "Sharing Type")}
           </p>
           {filters.sharingTypes.length > 0 && (
             <span className="text-[10px] text-[#0F4C81] font-semibold">
@@ -248,7 +250,7 @@ export default function FilterSidebar({
       <div className="pt-2 border-t border-gray-100">
         <div className="flex items-center justify-between mb-2">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-            Monthly Budget
+            {t("filters.priceRange", "Monthly Budget")}
           </p>
           <span className="text-xs font-bold text-[#0F4C81]">
             ₹{filters.minPrice.toLocaleString("en-IN")} – ₹{filters.maxPrice.toLocaleString("en-IN")}
@@ -321,7 +323,7 @@ export default function FilterSidebar({
       {/* 4. AC / Non-AC */}
       <div className="pt-2 border-t border-gray-100">
         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
-          Cooling / AC
+          {t("filters.cooling", "Cooling / AC")}
         </p>
         <div className="flex flex-wrap gap-2">
           {(["AC", "Non-AC"] as const).map((ac) => {
@@ -360,7 +362,7 @@ export default function FilterSidebar({
       {/* 5. Furnishing */}
       <div className="pt-2 border-t border-gray-100">
         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
-          Furnishing
+          {t("filters.furnishing", "Furnishing")}
         </p>
         <div className="flex flex-wrap gap-2">
           {(["Fully Furnished", "Semi Furnished", "Unfurnished"] as const).map((f) => {
@@ -399,7 +401,7 @@ export default function FilterSidebar({
       {/* 7. Gender Preference */}
       <div className="pt-2 border-t border-gray-100">
         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
-          Gender Preference
+          {t("filters.genderPreference", "Gender Preference")}
         </p>
         <div className="flex flex-wrap gap-2">
           {["Boys", "Girls", "Co-Ed"].map((g) => {
@@ -437,7 +439,7 @@ export default function FilterSidebar({
 
       {/* 8. Meals & Food */}
       <div className="space-y-2.5 pt-2 border-t border-gray-100">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Meals &amp; Food</p>
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t("filters.foodMess", "Meals & Food")}</p>
         <label className="flex items-center gap-2.5 cursor-pointer select-none">
           <input
             type="checkbox"
@@ -460,9 +462,9 @@ export default function FilterSidebar({
 
       {/* 9. Rules & Freedom */}
       <div className="space-y-2.5 pt-2 border-t border-gray-100">
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Rules &amp; Freedom</p>
+        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{t("filters.rules", "Rules & Freedom")}</p>
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm text-gray-700">No Curfew Restriction</span>
+          <span className="text-xs sm:text-sm text-gray-700">{t("filters.noCurfew", "No Curfew Restriction")}</span>
           <button
             type="button"
             onClick={() => onChange("noCurfew", !filters.noCurfew)}
@@ -478,7 +480,7 @@ export default function FilterSidebar({
           </button>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm text-gray-700">Visitors Allowed</span>
+          <span className="text-xs sm:text-sm text-gray-700">{t("filters.visitorsAllowed", "Visitors Allowed")}</span>
           <button
             type="button"
             onClick={() => onChange("visitorAllowed", !filters.visitorAllowed)}
@@ -498,7 +500,7 @@ export default function FilterSidebar({
       {/* 10. Amenities */}
       <div className="pt-2 border-t border-gray-100">
         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2.5">
-          Amenities
+          {t("filters.amenities", "Amenities")}
         </p>
         <div className="grid grid-cols-2 gap-2">
           {AMENITIES_LIST.map((a) => {

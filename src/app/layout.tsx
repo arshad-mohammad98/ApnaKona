@@ -5,6 +5,9 @@ import Footer from "@/components/layout/Footer";
 import ChatbotWidget from "@/components/layout/ChatbotWidget";
 import { AuthProvider } from "@/lib/context/AuthContext";
 import { ThemeProvider } from "@/lib/context/ThemeContext";
+import { I18nProvider } from "@/lib/i18n/I18nProvider";
+import FloatingLanguageWidget from "@/components/ui/FloatingLanguageWidget";
+import LanguageSelectorModal from "@/components/ui/LanguageSelectorModal";
 
 export const metadata: Metadata = {
   title: "ApnaKona — Find PG, Hostel & Flats Near Your College",
@@ -29,10 +32,14 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-surface transition-colors duration-200">
         <ThemeProvider>
           <AuthProvider>
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <ChatbotWidget />
+            <I18nProvider>
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <ChatbotWidget />
+              <FloatingLanguageWidget />
+              <LanguageSelectorModal />
+            </I18nProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

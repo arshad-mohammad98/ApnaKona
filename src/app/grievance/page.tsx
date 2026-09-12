@@ -6,6 +6,7 @@ import { DUMMY_COMPLAINTS } from "@/lib/data/complaints";
 import { DUMMY_LISTINGS } from "@/lib/data/listings";
 import { Complaint } from "@/lib/types";
 import { SITE_CONTACT } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 const STATUS_COLORS: Record<Complaint["status"], string> = {
   Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
@@ -22,6 +23,7 @@ const STATUS_ICONS: Record<Complaint["status"], React.ReactNode> = {
 };
 
 export default function GrievancePage() {
+  const { t } = useTranslation();
   const [tab, setTab] = useState<"listing" | "platform" | "tracker">("listing");
   const [listingForm, setListingForm] = useState({ listingId: "", subject: "", description: "" });
   const [platformForm, setPlatformForm] = useState({ subject: "", description: "" });
@@ -58,10 +60,12 @@ export default function GrievancePage() {
             <div className="w-10 h-10 rounded-2xl bg-white/15 flex items-center justify-center">
               <MessageSquareWarning className="w-5 h-5 text-white" />
             </div>
-            <h1 className="font-display text-2xl sm:text-3xl font-bold">Grievance &amp; Redressal</h1>
+            <h1 className="font-display text-2xl sm:text-3xl font-bold">
+              {t("grievance.title", "Student Grievance Redressal")}
+            </h1>
           </div>
           <p className="text-white/80 text-xs sm:text-sm max-w-xl leading-relaxed">
-            Report misleading listings, owner misconduct, or platform issues. We review all complaints and take action within 72 hours.
+            {t("grievance.subtitle", "Transparent, time-bound resolution for student housing and hostel disputes")}
           </p>
         </div>
       </div>
@@ -72,13 +76,13 @@ export default function GrievancePage() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FF6B35]/10 text-[#FF6B35] text-xs font-bold">
               <Headphones className="w-3.5 h-3.5" />
-              Direct Support Channels
+              {t("grievance.directChannels", "Direct Support Channels")}
             </div>
             <h2 className="font-display font-bold text-base sm:text-lg text-gray-900">
-              Need immediate help outside formal grievance?
+              {t("grievance.directSupport", "Need immediate help outside formal grievance?")}
             </h2>
             <p className="text-gray-500 text-xs sm:text-sm max-w-lg">
-              For urgent safety concerns, payment disputes, or quick inquiries, reach our student support desk directly:
+              {t("grievance.directSupportSub", "For urgent safety concerns, payment disputes, or quick inquiries, reach our student support desk directly:")}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0">

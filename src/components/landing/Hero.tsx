@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MapPin, ChevronRight, LocateFixed, Loader2, AlertCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 const CITIES = ["Bangalore", "Pune", "Delhi", "Mumbai", "Chennai", "Hyderabad", "Noida", "Pilani"];
 
@@ -56,6 +57,7 @@ async function reverseGeocode(latitude: number, longitude: number): Promise<stri
 }
 
 export default function Hero() {
+  const { t } = useTranslation();
   const [city, setCity] = useState("");
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -133,22 +135,22 @@ export default function Hero() {
           {/* Pill badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 mb-6 animate-fade-up">
             <span className="w-2 h-2 bg-[#FF6B35] rounded-full pulse-dot" />
-            <span className="text-white/90 text-sm font-medium">India&apos;s #1 Student Accommodation Platform</span>
+            <span className="text-white/90 text-sm font-medium">{t("hero.badge", "India's #1 Student Accommodation Platform")}</span>
           </div>
 
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            Find Your{" "}
+            {t("hero.titlePre", "Find Your ")}
             <span className="relative">
-              <span className="text-[#FF6B35]">Perfect Corner</span>
+              <span className="text-[#FF6B35]">{t("hero.titleHighlight", "Perfect Corner")}</span>
               <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 300 12" fill="none">
                 <path d="M1 10 Q75 2 150 10 Q225 18 299 10" stroke="#FF6B35" strokeWidth="2.5" strokeLinecap="round" fill="none" opacity="0.5" />
               </svg>
-            </span>{" "}
-            in Every City
+            </span>
+            {t("hero.titlePost", " in Every City")}
           </h1>
 
           <p className="text-white/70 text-lg sm:text-xl mb-10 max-w-2xl animate-fade-up" style={{ animationDelay: "0.2s" }}>
-            Verified PGs, hostels &amp; flats — handpicked for students. No broker fees, no surprises. Just your home away from home.
+            {t("hero.subtitle", "Verified PGs, hostels & flats — handpicked for students. No broker fees, no surprises. Just your home away from home.")}
           </p>
 
           {/* Search Card */}
@@ -164,7 +166,7 @@ export default function Hero() {
                     setCity(e.target.value);
                     if (locationError) setLocationError(null);
                   }}
-                  placeholder="City or locality..."
+                  placeholder={t("hero.searchPlaceholder", "City or locality...")}
                   className={`w-full pl-11 ${geoSupported ? "pr-12" : "pr-4"} py-3 min-h-[46px] rounded-xl border border-gray-200 outline-none focus:border-[#0F4C81] focus:ring-2 focus:ring-[#0F4C81]/15 text-gray-800 text-sm font-medium bg-white transition-all`}
                   required
                 />
@@ -178,8 +180,8 @@ export default function Hero() {
                     type="button"
                     onClick={handleGetLocation}
                     disabled={isLocating}
-                    title="Use my current location"
-                    aria-label="Use my current location"
+                    title={t("hero.detectLocation", "Detect my current location")}
+                    aria-label={t("hero.detectLocation", "Detect my current location")}
                     className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg text-gray-400 hover:text-[#0F4C81] hover:bg-[#0F4C81]/8 active:scale-95 transition-all cursor-pointer disabled:cursor-wait min-h-[38px] min-w-[38px] flex items-center justify-center"
                   >
                     {isLocating ? (
@@ -197,7 +199,7 @@ export default function Hero() {
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 sm:px-8 py-3 min-h-[46px] bg-[#FF6B35] hover:bg-[#e85a22] text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-orange-500/30 active:scale-95 cursor-pointer shrink-0"
               >
                 <Search className="w-4 h-4" />
-                Search
+                {t("hero.searchBtn", "Search")}
               </button>
             </form>
 
@@ -221,7 +223,7 @@ export default function Hero() {
 
             {/* Popular Searches */}
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-4">
-              <span className="text-gray-500 text-xs font-medium">Popular:</span>
+              <span className="text-gray-500 text-xs font-medium">{t("hero.popular", "Popular:")}</span>
               {CITIES.slice(0, 5).map((c) => (
                 <button
                   key={c}
@@ -241,9 +243,9 @@ export default function Hero() {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-8 mt-10 sm:mt-12 animate-fade-up" style={{ animationDelay: "0.4s" }}>
             {[
-              { num: "50,000+", label: "Verified Listings" },
-              { num: "200+", label: "Cities Covered" },
-              { num: "2 Lakh+", label: "Happy Students" },
+              { num: "50,000+", label: t("hero.statVerified", "Verified Listings") },
+              { num: "200+", label: t("hero.statCities", "Cities Covered") },
+              { num: "2 Lakh+", label: t("hero.statStudents", "Happy Students") },
             ].map(({ num, label }, idx) => (
               <div key={label} className={idx === 2 ? "col-span-2 sm:col-span-1" : ""}>
                 <p className="text-2xl sm:text-3xl font-display font-bold text-white">{num}</p>
@@ -256,7 +258,7 @@ export default function Hero() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/40 animate-bounce">
-        <span className="text-xs">Scroll</span>
+        <span className="text-xs">{t("hero.scroll", "Scroll")}</span>
         <ChevronRight className="w-4 h-4 rotate-90" />
       </div>
     </section>

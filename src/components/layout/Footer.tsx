@@ -6,8 +6,10 @@ import { FaInstagram, FaXTwitter, FaPhone } from "react-icons/fa6";
 import { SiGmail } from "react-icons/si";
 import Logo from "@/components/ui/Logo";
 import { SITE_CONTACT, SITE_SOCIAL } from "@/lib/constants";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="bg-[#1A1A2E] text-white pt-16 pb-8 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -18,7 +20,7 @@ export default function Footer() {
               <Logo variant="full" size="md" theme="dark" />
             </Link>
             <p className="text-gray-400 text-xs sm:text-sm leading-relaxed max-w-sm">
-              India&apos;s most trusted platform for students to find safe, affordable, and verified accommodation near top colleges.
+              {t("footer.tagline", "India's most trusted platform for students to find safe, affordable, and verified accommodation near top colleges.")}
             </p>
             <div className="flex items-center gap-2.5 pt-2">
               <a
@@ -62,14 +64,14 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">Quick Links</h3>
+            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">{t("footer.exploreTitle", "Quick Links")}</h3>
             <ul className="space-y-2.5">
               {[
-                { href: "/", label: "Home", icon: Home },
-                { href: "/hostels", label: "Hostel/PG", icon: Search },
-                { href: "/explore", label: "Explore City", icon: Map },
-                { href: "/connect", label: "Find Roommates", icon: Users },
-                { href: "/grievance", label: "Raise Grievance", icon: MessageSquare },
+                { href: "/", label: t("nav.home", "Home"), icon: Home },
+                { href: "/hostels", label: t("nav.findHostels", "Hostel/PG"), icon: Search },
+                { href: "/explore", label: t("nav.exploreHubs", "Explore City"), icon: Map },
+                { href: "/connect", label: t("nav.roomieConnect", "Find Roommates"), icon: Users },
+                { href: "/grievance", label: t("nav.grievance", "Raise Grievance"), icon: MessageSquare },
               ].map(({ href, label, icon: Icon }) => (
                 <li key={href}>
                   <Link
@@ -86,7 +88,7 @@ export default function Footer() {
 
           {/* For Owners */}
           <div>
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">For Property Owners</h3>
+            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">{t("footer.companyTitle", "For Property Owners")}</h3>
             <ul className="space-y-2.5">
               {[
                 { href: "/role-select", label: "List Your Property" },
@@ -116,7 +118,7 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">Contact Us</h3>
+            <h3 className="font-display font-semibold text-sm sm:text-base mb-4 text-white">{t("footer.contactTitle", "Contact Us")}</h3>
             <div className="space-y-3">
               <a
                 href={SITE_CONTACT.emailHref}
@@ -136,7 +138,7 @@ export default function Footer() {
 
             {/* Social Media Links */}
             <div className="mt-4 pt-3.5 border-t border-white/10">
-              <p className="text-xs text-gray-400 mb-2.5 font-medium">Follow Us</p>
+              <p className="text-xs text-gray-400 mb-2.5 font-medium">{t("footer.followUs", "Follow Us")}</p>
               <div className="flex items-center gap-2">
                 <a
                   href={SITE_SOCIAL.instagram}
@@ -178,18 +180,18 @@ export default function Footer() {
             </div>
 
             <div className="mt-5">
-              <p className="text-xs text-gray-400 mb-2 font-medium">Get Campus Housing Updates</p>
+              <p className="text-xs text-gray-400 mb-2 font-medium">{t("footer.newsletter", "Get Campus Housing Updates")}</p>
               <form onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row gap-2 max-w-sm">
                 <input
                   type="email"
-                  placeholder="student@college.edu"
+                  placeholder={t("footer.newsletterPlaceholder", "student@college.edu")}
                   className="flex-1 bg-white/10 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-gray-400 outline-none focus:border-[#FF6B35] transition-colors min-h-[44px]"
                 />
                 <button
                   type="submit"
                   className="px-4 py-2.5 bg-[#FF6B35] rounded-xl text-white text-xs font-bold hover:bg-[#e85a22] transition-colors shrink-0 min-h-[44px] cursor-pointer"
                 >
-                  Join
+                  {t("footer.subscribe", "Join")}
                 </button>
               </form>
             </div>
@@ -198,13 +200,13 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 text-xs text-gray-500 text-center sm:text-left">
-          <p>© 2026 ApnaKona. All rights reserved. Built with ❤️ for Indian students.</p>
+          <p>© 2026 ApnaKona. {t("footer.copyright", "All rights reserved. Built with ❤️ for Indian students.")}</p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="#" className="hover:text-gray-300 transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-gray-300 transition-colors">{t("footer.privacy", "Privacy Policy")}</a>
             <span>•</span>
-            <a href="#" className="hover:text-gray-300 transition-colors">Terms of Service</a>
+            <a href="#" className="hover:text-gray-300 transition-colors">{t("footer.terms", "Terms of Service")}</a>
             <span>•</span>
-            <a href="#" className="hover:text-gray-300 transition-colors">Safety Standards</a>
+            <a href="#" className="hover:text-gray-300 transition-colors">{t("footer.safety", "Safety Standards")}</a>
           </div>
         </div>
       </div>

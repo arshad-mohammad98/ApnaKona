@@ -27,6 +27,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
 import { Listing } from "@/lib/types";
 import GoogleMapView from "@/components/ui/GoogleMapView";
+import { useTranslation } from "react-i18next";
 
 const LOCAL_HIGHLIGHTS = [
   { id: "safety", label: "High Safety Rating (4.5+)", icon: Shield },
@@ -36,6 +37,7 @@ const LOCAL_HIGHLIGHTS = [
 ];
 
 export default function ExplorePage() {
+  const { t } = useTranslation();
   const [selectedCity, setSelectedCity] = useState<CityInfo>(CITIES[0]);
   const [selectedArea, setSelectedArea] = useState<AreaInfo | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -399,10 +401,10 @@ export default function ExplorePage() {
                 )}
               </div>
               <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#1A1A2E]">
-                Explore Campus Neighborhoods
+                {t("explore.title", "Explore Campus Neighborhoods")}
               </h1>
               <p className="text-gray-500 text-xs sm:text-sm mt-1">
-                Discover listings, student hubs, transport routes, and safety ratings on the map.
+                {t("explore.subtitle", "Discover listings, student hubs, transport routes, and safety ratings on the map.")}
               </p>
             </div>
 
