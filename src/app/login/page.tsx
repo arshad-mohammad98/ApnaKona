@@ -18,27 +18,72 @@ function LoginContent() {
   const [error, setError] = useState("");
   const { login } = useAuth();
   const router = useRouter();
+  const redirectUrl = searchParams.get("redirect");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    await new Promise((r) => setTimeout(r, 600));
-    const found = DUMMY_USERS.find((u) => u.email === email && u.role === role);
-    if (found) {
-      login(found as Parameters<typeof login>[0]);
-    } else {
-      const demo = DUMMY_USERS.find((u) => u.role === role);
-      if (demo) {
-        login(demo as Parameters<typeof login>[0]);
-      } else {
-        setError("Invalid credentials. Try using the demo account credentials below.");
-        setLoading(false);
+
+    try {
+      // 1. Try signing in with Supabase Auth
+      let { data: authData, error: authError } = await (await import("@/lib/supabaseClient")).supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password,
+      });
+
+      // If user typed any password for demo accounts, fallback to default seed password
+      if (authError && (email.trim().toLowerCase() === "aarav@example.com" || email.trim().toLowerCase() === "rajesh@example.com")) {
+        const fallbackRes = await (await import("@/lib/supabaseClient")).supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password: "Password@123",
+        });
+        if (!fallbackRes.error) {
+          authData = fallbackRes.data;
+          authError = null;
+        }
+      }
+
+      if (authError || !authData?.user) {
+        // Check dummy fallback if Supabase auth fails
+        const found = DUMMY_USERS.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+        if (found) {
+          login(found as Parameters<typeof login>[0]);
+          router.push(redirectUrl || (role === "owner" ? "/dashboard/owner" : "/dashboard/student"));
+          return;
+        }
+        setError(authError?.message || "Invalid credentials. Please check your email and password.");
         return;
       }
+
+      // Fetch profile from database
+      const { data: profile } = await (await import("@/lib/supabaseClient")).supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authData.user.id)
+        .maybeSingle();
+
+      const userRole = (profile?.role || authData.user.user_metadata?.role || role) as "student" | "owner";
+
+      login({
+        id: authData.user.id,
+        name: profile?.full_name || authData.user.user_metadata?.full_name || email.split("@")[0],
+        email: authData.user.email || email,
+        phone: profile?.phone || "",
+        role: userRole,
+        college: profile?.college_or_company,
+        preferredCity: profile?.preferred_city,
+        businessName: profile?.business_name,
+        verified: profile?.is_verified ?? false,
+      });
+
+      router.push(redirectUrl || (userRole === "owner" ? "/dashboard/owner" : "/dashboard/student"));
+    } catch (err: unknown) {
+      console.error("Login exception:", err);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    router.push(role === "owner" ? "/dashboard/owner" : "/dashboard/student");
-    setLoading(false);
   };
 
   return (

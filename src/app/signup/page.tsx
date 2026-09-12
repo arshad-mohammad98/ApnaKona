@@ -128,6 +128,17 @@ function SignupContent() {
         return false;
       }
 
+      // Establish Supabase client session
+      try {
+        const { supabase } = await import("@/lib/supabaseClient");
+        await supabase.auth.signInWithPassword({
+          email: form.email.trim().toLowerCase(),
+          password: form.password,
+        });
+      } catch (authErr) {
+        console.warn("Client session initialization notice:", authErr);
+      }
+
       login(
         data.user || {
           id: `new-${Date.now()}`,
