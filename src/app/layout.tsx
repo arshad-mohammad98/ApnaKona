@@ -29,7 +29,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen flex flex-col bg-surface transition-colors duration-200">
+      <body className="min-h-screen flex flex-col bg-surface transition-colors duration-200" suppressHydrationWarning>
         <ThemeProvider>
           <AuthProvider>
             <I18nProvider>
