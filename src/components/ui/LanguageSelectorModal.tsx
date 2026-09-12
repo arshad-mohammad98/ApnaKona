@@ -106,10 +106,10 @@ export default function LanguageSelectorModal() {
                             : "text-gray-900 dark:text-slate-100 group-hover:text-[#0F4C81] dark:group-hover:text-sky-300"
                         }`}
                       >
-                        {lang.nativeName}
+                        {lang.code === "en" ? "English" : `${lang.nativeName} (${lang.name})`}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-slate-400 truncate">
-                        {lang.name}
+                        {lang.code === "en" ? "Default Language" : lang.name}
                       </p>
                     </div>
                   </div>
