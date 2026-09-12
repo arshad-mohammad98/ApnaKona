@@ -1,0 +1,572 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@import "tailwindcss";
+
+/* Enable class-based dark mode selector in Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   OCEANIC SLATE GRADIENT THEME (Derived from uploaded reference)
+   Gradient: #4A7C94 (Top) -> #2A556A (Mid) -> #152F3C (Deep)
+   Clean, modern, calm, trustworthy, premium atmosphere
+   ============================================================ */
+
+@theme {
+  /* Primary Oceanic Slate: #234C60 (Buttons, links, active states) */
+  --color-primary-50: #F2F7FA;
+  --color-primary-100: #E5EFF4; /* Soft ice slate tint */
+  --color-primary-200: #C2D9E5;
+  --color-primary-300: #88B4C9;
+  --color-primary-400: #35657C; /* Light stop of user gradient */
+  --color-primary-500: #234C60; /* Core Oceanic Slate */
+  --color-primary-600: #1B3E50; /* Lower-mid stop */
+  --color-primary-700: #14313F; /* Deep stop */
+  --color-primary-800: #102632;
+  --color-primary-900: #0D212D;
+
+  /* Accent: #F09A57 (Warm vibrant orange highlights / CTAs) */
+  --color-accent-50: #FEF7F1;
+  --color-accent-100: #FDEEE2;
+  --color-accent-200: #FBD8C1;
+  --color-accent-300: #F8BE97;
+  --color-accent-400: #F5A873;
+  --color-accent-500: #F09A57; /* Accent */
+  --color-accent-600: #E08945;
+  --color-accent-700: #C7641E;
+  --color-accent-800: #A04E14;
+  --color-accent-900: #7A380A;
+
+  /* Mint: #D4ECE5 (Verified/success elements) */
+  --color-mint-50: #F4FBF8;
+  --color-mint-100: #D4ECE5; /* Mint */
+  --color-mint-200: #BCE2D7;
+  --color-mint-300: #92D3C0;
+  --color-mint-400: #5DBCA3;
+  --color-mint-500: #359E83;
+  --color-mint-600: #257D67;
+  --color-mint-700: #1D5E4E;
+
+  /* Specific Tokens matching uploaded image */
+  --color-softblue: #E5EFF4; /* Soft ice highlights */
+  --color-mint: #D4ECE5;     /* Verified/success elements */
+  --color-surface: #F8FAFC;  /* Main overall background */
+  --color-card: #FFFFFF;     /* Card background */
+  --color-dark: #0D212D;     /* Crisp deep oceanic dark text */
+  --color-secondary: #2D4756; /* Secondary descriptions */
+  --color-border: #CBD8DF;   /* Cards and dividers */
+
+  /* Typography: Clean, modern, calm, slightly playful */
+  --font-sans: "Plus Jakarta Sans", "Outfit", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Outfit", "Poppins", "Plus Jakarta Sans", sans-serif;
+
+  --shadow-card: 0 2px 14px 0 rgba(42, 85, 106, 0.08);
+  --shadow-card-hover: 0 8px 28px 0 rgba(42, 85, 106, 0.14);
+
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+/* ============================================================
+   TYPOGRAPHY & HIGH CONTRAST COLOR HARMONY
+   Rule: Much darker text on light canvas; pure radiant light on dark
+   ============================================================ */
+
+body {
+  font-family: var(--font-sans);
+  background-color: #F7FAFC;
+  color: #0F172A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.012em;
+  line-height: 1.55;
+  overflow-x: hidden;
+  width: 100%;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+    color: #0B132B;
+    font-weight: 700;
+  }
+
+  p {
+    color: #334155;
+    line-height: 1.6;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7FAFC;
+}
+::-webkit-scrollbar-thumb {
+  background: #7DA4B8;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2A556A;
+}
+
+/* Range slider */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: #E2E8F0;
+  border-radius: 9999px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #2A556A;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(42, 85, 106, 0.35);
+}
+
+/* Card hover lift */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 36px rgba(42, 85, 106, 0.14);
+}
+
+/* Gradient text with Oceanic Slate & Accent */
+.gradient-text {
+  background: linear-gradient(135deg, #2A556A 0%, #F4A261 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass effect in Light Mode */
+.glass {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  color: #1F2937;
+}
+
+/* Animate fade up */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.5s ease forwards;
+}
+
+/* Smooth Tab Transition Animations */
+@keyframes tabFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.tab-pane-transition {
+  animation: tabFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+/* Pulse dot */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+.pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+/* font-display utility */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* shadow-card utility */
+.shadow-card {
+  box-shadow: 0 2px 14px 0 rgba(59, 130, 160, 0.08);
+}
+
+/* Chatbot custom animations */
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-message-in {
+  animation: messageIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 160, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 160, 0);
+  }
+}
+.animate-pulse-glow {
+  animation: pulseGlow 2.4s infinite;
+}
+
+/* ============================================================
+   COLOR SYSTEM BRIDGING (Oceanic Slate Gradient)
+   Ensures seamless palette upgrade across all TSX components
+   ============================================================ */
+
+/* Primary brand replacements: -> #234C60 */
+.bg-\[\#0F4C81\],
+.bg-\[\#3B82A0\],
+.bg-\[\#2A556A\] {
+  background-color: #234C60 !important;
+}
+.hover\:bg-\[\#0d3f6e\]:hover,
+.hover\:bg-\[\#2F6C86\]:hover,
+.hover\:bg-\[\#2F6D87\]:hover,
+.hover\:bg-\[\#214557\]:hover {
+  background-color: #173747 !important;
+}
+.text-\[\#0F4C81\],
+.text-\[\#3B82A0\],
+.text-\[\#2A556A\] {
+  color: #234C60 !important;
+}
+.hover\:text-\[\#0F4C81\]:hover,
+.hover\:text-\[\#3B82A0\]:hover,
+.hover\:text-\[\#2A556A\]:hover {
+  color: #234C60 !important;
+}
+.border-\[\#0F4C81\],
+.border-\[\#3B82A0\],
+.border-\[\#2A556A\] {
+  border-color: #234C60 !important;
+}
+.focus\:border-\[\#0F4C81\]:focus,
+.focus\:border-\[\#3B82A0\]:focus,
+.focus\:border-\[\#2A556A\]:focus {
+  border-color: #234C60 !important;
+}
+.focus\:ring-\[\#0F4C81\]\/15:focus,
+.focus\:ring-\[\#0F4C81\]\/40:focus,
+.focus\:ring-\[\#3B82A0\]\/15:focus,
+.focus\:ring-\[\#3B82A0\]\/20:focus,
+.focus\:ring-\[\#2A556A\]\/20:focus {
+  --tw-ring-color: rgba(35, 76, 96, 0.25) !important;
+}
+
+/* Accent brand replacements: #FF6B35 -> #F09A57 */
+.bg-\[\#FF6B35\],
+.bg-\[\#F4A261\] {
+  background-color: #F09A57 !important;
+}
+.hover\:bg-\[\#e85a22\]:hover,
+.hover\:bg-\[\#e7924e\]:hover {
+  background-color: #E08945 !important;
+}
+.text-\[\#FF6B35\],
+.text-\[\#F4A261\] {
+  color: #F09A57 !important;
+}
+.hover\:text-\[\#FF6B35\]:hover,
+.hover\:text-\[\#F4A261\]:hover {
+  color: #F09A57 !important;
+}
+.border-\[\#FF6B35\],
+.border-\[\#F4A261\] {
+  border-color: #F09A57 !important;
+}
+
+/* Tinted brand backgrounds to soft ice slate #E5EFF4 */
+.bg-\[\#0F4C81\]\/10,
+.bg-\[\#0F4C81\]\/8,
+.bg-\[\#0F4C81\]\/5,
+.bg-\[\#3B82A0\]\/10,
+.bg-\[\#DCEFF5\],
+.bg-\[\#D9E8EF\] {
+  background-color: #E5EFF4 !important;
+  color: #0D212D !important;
+}
+
+/* Oceanic Gradient Utilities matching user reference image */
+.bg-ocean-gradient {
+  background: linear-gradient(135deg, #35657C 0%, #234C60 50%, #102632 100%) !important;
+}
+.bg-ocean-gradient-h {
+  background: linear-gradient(90deg, #102632 0%, #234C60 50%, #35657C 100%) !important;
+}
+
+/* ============================================================
+   CONTRAST ENGINE: DARK TEXT ON LIGHT, LIGHT TEXT ON DARK
+   ============================================================ */
+
+/* 1. DARK BACKGROUNDS: Pure radiant light text */
+section.bg-gradient-to-br,
+div.bg-gradient-to-r,
+div.bg-gradient-to-br,
+footer,
+.bg-\[\#1F2937\],
+.bg-\[\#111827\],
+.bg-\[\#0F172A\],
+.bg-slate-900,
+.bg-slate-800,
+.bg-gray-900 {
+  color: #F8FAFC;
+}
+
+section.bg-gradient-to-br h1,
+section.bg-gradient-to-br h2,
+section.bg-gradient-to-br h3,
+section.bg-gradient-to-br h4,
+div.bg-gradient-to-r h1,
+div.bg-gradient-to-r h2,
+div.bg-gradient-to-r h3,
+div.bg-gradient-to-br h1,
+div.bg-gradient-to-br h2,
+div.bg-gradient-to-br h3,
+footer h1,
+footer h2,
+footer h3,
+footer h4 {
+  color: #FFFFFF !important;
+}
+
+section.bg-gradient-to-br p,
+div.bg-gradient-to-r p,
+div.bg-gradient-to-br p,
+footer p {
+  color: #F1F5F9 !important;
+}
+
+/* Eliminate washed-out opacity on dark backgrounds */
+section.bg-gradient-to-br .text-white\/85,
+section.bg-gradient-to-br .text-white\/80,
+div.bg-gradient-to-br .text-white\/85,
+div.bg-gradient-to-br .text-white\/80 {
+  color: #F8FAFC !important;
+}
+
+section.bg-gradient-to-br .text-white\/40 {
+  color: #CBD5E1 !important;
+}
+
+footer a {
+  color: #F1F5F9;
+}
+footer a:hover {
+  color: #F4A261 !important;
+}
+footer .text-slate-300,
+footer .text-gray-400 {
+  color: #E2E8F0 !important;
+}
+
+/* 2. LIGHT BACKGROUNDS: Darker, crisp high-contrast text */
+html:not(.dark) .bg-white,
+html:not(.dark) .bg-surface,
+html:not(.dark) .bg-\[\#F7FAFC\],
+html:not(.dark) .bg-\[\#F9FAFB\],
+html:not(.dark) .glass {
+  color: #0F172A;
+}
+
+html:not(.dark) .bg-white h1,
+html:not(.dark) .bg-white h2,
+html:not(.dark) .bg-white h3,
+html:not(.dark) .bg-white h4,
+html:not(.dark) .bg-surface h1,
+html:not(.dark) .bg-surface h2,
+html:not(.dark) .bg-surface h3,
+html:not(.dark) .bg-\[\#F7FAFC\] h1,
+html:not(.dark) .bg-\[\#F7FAFC\] h2,
+html:not(.dark) .bg-\[\#F7FAFC\] h3 {
+  color: #0B132B !important;
+}
+
+html:not(.dark) .bg-white p,
+html:not(.dark) .bg-surface p,
+html:not(.dark) .bg-\[\#F7FAFC\] p {
+  color: #334155;
+}
+
+/* Make default gray text darker and much more readable on light canvases */
+html:not(.dark) .text-\[\#1F2937\],
+html:not(.dark) .text-gray-900,
+html:not(.dark) .text-gray-800,
+html:not(.dark) .text-slate-800,
+html:not(.dark) .text-dark {
+  color: #0B132B !important;
+}
+
+html:not(.dark) .text-\[\#64748B\],
+html:not(.dark) .text-gray-600,
+html:not(.dark) .text-slate-600,
+html:not(.dark) .text-gray-500,
+html:not(.dark) .text-slate-500,
+html:not(.dark) .text-secondary {
+  color: #334155 !important;
+}
+
+/* Light inputs & controls */
+html:not(.dark) .glass input,
+html:not(.dark) .bg-white input,
+html:not(.dark) input.bg-white,
+html:not(.dark) select.bg-white,
+html:not(.dark) input,
+html:not(.dark) select,
+html:not(.dark) textarea {
+  color: #0F172A !important;
+}
+
+html:not(.dark) input::placeholder,
+html:not(.dark) textarea::placeholder {
+  color: #475569 !important;
+}
+
+/* High contrast badges and chips on light background */
+html:not(.dark) .bg-\[\#DCEFF5\] {
+  color: #164355 !important;
+}
+
+html:not(.dark) .bg-\[\#DDF3EA\] {
+  color: #144D37 !important;
+}
+
+/* ============================================================
+   DARK MODE COMPATIBILITY
+   ============================================================ */
+
+html.dark {
+  color-scheme: dark;
+}
+
+html.dark body {
+  background-color: #0B1120;
+  color: #F8FAFC;
+}
+
+html.dark p {
+  color: #CBD5E1;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #0B1120;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #26556B;
+}
+
+html.dark input[type="range"] {
+  background: #1E293B;
+}
+
+html.dark .glass {
+  background: rgba(11, 17, 32, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #F8FAFC;
+}
+
+html.dark .bg-white {
+  background-color: #131D31 !important;
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-slate-50 {
+  background-color: #1E293B !important;
+}
+
+html.dark .bg-surface,
+html.dark .bg-\[\#F7FAFC\],
+html.dark .bg-\[\#F9FAFB\] {
+  background-color: #0B1120 !important;
+}
+
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-\[\#E2E8F0\] {
+  border-color: #1E293B !important;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6 {
+  color: #FFFFFF !important;
+}
+
+html.dark .text-dark,
+html.dark .text-\[\#1F2937\],
+html.dark .text-gray-900 {
+  color: #F8FAFC !important;
+}
+
+html.dark .text-secondary,
+html.dark .text-\[\#64748B\],
+html.dark .text-gray-600,
+html.dark .text-gray-500 {
+  color: #CBD5E1 !important;
+}
+
+html.dark .text-\[\#0F4C81\],
+html.dark .text-\[\#3B82A0\] {
+  color: #7DD3FC !important;
+}
+
+html.dark .text-\[\#FF6B35\],
+html.dark .text-\[\#F4A261\] {
+  color: #FDBA74 !important;
+}
+
+html.dark .bg-\[\#0F4C81\],
+html.dark .bg-\[\#3B82A0\] {
+  background-color: #2F6C86 !important;
+}
+
+html.dark .bg-\[\#FF6B35\],
+html.dark .bg-\[\#F4A261\] {
+  background-color: #E7843B !important;
+}
+
+html.dark .bg-\[\#DCEFF5\] {
+  background-color: rgba(59, 130, 160, 0.22) !important;
+  color: #7DD3FC !important;
+}
+
+html.dark .bg-\[\#DDF3EA\] {
+  background-color: rgba(34, 99, 78, 0.25) !important;
+  color: #93D5BC !important;
+}
