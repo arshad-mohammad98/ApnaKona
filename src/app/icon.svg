@@ -1,0 +1,12 @@
+<svg width="32" height="32" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="40" height="40" rx="12" fill="#0F4C81" />
+  <!-- Overlapping community roof -->
+  <path d="M21 13.5L28.5 7.5L34 12V28C34 29.1046 33.1046 30 32 30H27" stroke="#FF6B35" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Primary House Silhouette -->
+  <path d="M6 18.5L18.25 8.2C18.6835 7.83582 19.3165 7.83582 19.75 8.2L27 14.3" stroke="#FFFFFF" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Main House Base Walls -->
+  <path d="M9 16.5V29C9 30.1046 9.89543 31 11 31H26C27.1046 31 28 30.1046 28 29V16" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- "Kona" Arched Doorway -->
+  <path d="M15.5 31V23C15.5 21.6193 16.6193 20.5 18 20.5H19C20.3807 20.5 21.5 21.6193 21.5 23V31" fill="#FF6B35" stroke="#FF6B35" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  <circle cx="18.5" cy="15.5" r="1.75" fill="#FF6B35" />
+</svg>

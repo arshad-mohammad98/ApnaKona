@@ -1,0 +1,41 @@
+import { Complaint } from "../types";
+
+export const DUMMY_COMPLAINTS: Complaint[] = [
+  {
+    id: "cmp-001",
+    userId: "usr-001",
+    userName: "Aarav Mehta",
+    listingId: "lst-001",
+    listingName: "Sunshine PG for Boys — Near BITS Pilani",
+    type: "listing",
+    subject: "Owner not responding after payment",
+    description: "I paid the advance two weeks ago but the owner has not responded to any messages or calls since then.",
+    status: "Under Review",
+    createdAt: "2026-08-20",
+    updatedAt: "2026-08-22",
+  },
+  {
+    id: "cmp-002",
+    userId: "usr-001",
+    userName: "Aarav Mehta",
+    type: "platform",
+    subject: "Search filters not working on mobile",
+    description: "The budget slider doesn't work properly on my phone (Android Chrome). It jumps to random values.",
+    status: "Resolved",
+    createdAt: "2026-08-10",
+    updatedAt: "2026-08-14",
+  },
+  {
+    id: "cmp-003",
+    userId: "usr-003",
+    userName: "Pooja Agarwal",
+    listingId: "lst-004",
+    listingName: "Budget PG for Boys — Laxmi Nagar, Delhi",
+    type: "listing",
+    subject: "Photos don't match actual room",
+    description: "The photos on the listing show AC rooms but the actual rooms are non-AC. Very misleading.",
+    status: "Pending",
+    createdAt: "2026-08-28",
+    updatedAt: "2026-08-28",
+  },
+];
