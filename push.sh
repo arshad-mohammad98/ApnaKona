@@ -5,7 +5,7 @@ export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/
 
 cd "$(dirname "$0")"
 
-REPO_URL="https://github.com/AadarshMishra212/ApnaKonaa.git"
+REPO_URL="https://github.com/arshad-mohammad98/ApnaKona.git"
 
 echo "=========================================================="
 echo "  Pushing ApnaKona to GitHub: $REPO_URL"
